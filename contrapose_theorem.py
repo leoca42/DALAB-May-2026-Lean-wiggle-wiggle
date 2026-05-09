@@ -7,14 +7,14 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 LEAN_CODE = """\
 import Negate
 
--- Real.hasDerivAt_exp negated
-lemma to_negate (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
-  negate_state
+-- Real.hasDerivAt_exp: contrapositive
+lemma to_contrapose (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
+  contrapositive
   extract_goal
   sorry
 """
 
-tmp_path = os.path.join(PROJECT_DIR, "_negate_tmp.lean")
+tmp_path = os.path.join(PROJECT_DIR, "_contrapose_tmp.lean")
 try:
     with open(tmp_path, "w") as f:
         f.write(LEAN_CODE)
@@ -31,7 +31,7 @@ try:
 
     match = re.search(r"^theorem .*extracted.*$", output, re.MULTILINE)
     if match:
-        print("Negated goal:")
+        print("Contrapositive goal:")
         print(match.group(0))
     else:
         print("Could not find extracted goal. Raw Lean output:")
