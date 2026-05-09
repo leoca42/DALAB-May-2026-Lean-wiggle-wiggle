@@ -58,6 +58,87 @@ macro "converse" : tactic => `(tactic|
   )
 )
 
+
+-- Removes Prop-valued hypotheses that are not used by the target or by later
+-- hypotheses. This implements generalization by weakening hypotheses.
+open Lean Meta Elab Tactic in
+elab "clear_unused_props" : tactic => do
+  let mut goal ← getMainGoal
+  let decl ← goal.getDecl
+  let fvars := decl.lctx.foldl (init := #[]) fun acc d =>
+    if d.isImplementationDetail then acc else acc.push d.fvarId
+  for fvarId in fvars.reverse do
+    try
+      let localDecl ← fvarId.getDecl
+      if ← isProp localDecl.type then
+        goal ← goal.clear fvarId
+    catch _ =>
+      pure ()
+  replaceMainGoal [goal]
+
+open Lean.Elab.Tactic in
+macro "generalize_statement_by_weakening_hypotheses" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    clear_unused_props
+    guard_goal_nums 1
+  )
+)
+
+open Lean.Elab.Tactic in
+macro "generalize_state" : tactic => `(tactic|
+  (
+    generalize_statement_by_weakening_hypotheses
+  )
+)
+
+open Lean Meta Elab Tactic Term in
+def replaceMainGoalWithForExtraction (newTarget : Expr) : TacticM Unit := do
+  let goal ← getMainGoal
+  let oldTarget ← instantiateMVars (← goal.getType)
+  let newGoal ← mkFreshExprMVarAt (← getLCtx) (← getLocalInstances)
+    newTarget MetavarKind.syntheticOpaque (← goal.getTag)
+  let bridgeType ← mkArrow newTarget oldTarget
+  goal.assign (mkApp (← mkSorry bridgeType true) newGoal)
+  replaceMainGoal [newGoal.mvarId!]
+
+-- Adds a new Prop-valued assumption to the statement. The hypothesis is supplied
+-- explicitly, because Lean cannot infer which stronger context you want.
+open Lean Meta Elab Tactic Term in
+elab "weaken_statement_by_strengthening_hypotheses " hyp:term : tactic => do
+  liftMetaTactic1 fun goal => do
+    goal.checkNotAssigned `weaken_statement_by_strengthening_hypotheses
+    pure goal
+  withMainContext do
+    let oldTarget ← instantiateMVars (← getMainTarget)
+    let hypType ← Term.elabType hyp
+    replaceMainGoalWithForExtraction (← mkArrow hypType oldTarget)
+
+-- Replaces the current conclusion with an explicitly supplied stronger target.
+-- The caller is responsible for choosing a proposition that implies the original.
+open Lean Meta Elab Tactic Term in
+elab "strengthen_statement_by_strengthening_conclusion " newGoal:term : tactic => do
+  liftMetaTactic1 fun goal => do
+    goal.checkNotAssigned `strengthen_statement_by_strengthening_conclusion
+    pure goal
+  withMainContext do
+    let newTarget ← Term.elabType newGoal
+    replaceMainGoalWithForExtraction newTarget
+
+-- Replaces the current conclusion with an explicitly supplied weaker target.
+-- This is a statement-generation tactic: the admitted bridge lets extract_goal
+-- print the requested perturbation while Python/Lean later checks compilation.
+open Lean Meta Elab Tactic Term in
+elab "weaken_statement_by_weakening_conclusion " newGoal:term : tactic => do
+  liftMetaTactic1 fun goal => do
+    goal.checkNotAssigned `weaken_statement_by_weakening_conclusion
+    pure goal
+  withMainContext do
+    let newTarget ← Term.elabType newGoal
+    replaceMainGoalWithForExtraction newTarget
+  )
+)
+
 /--
   `mutate_goal_type`:
   Takes the current goal `⊢ T` and replaces it with `⊢ ∀ (h_extra : True), T`.
