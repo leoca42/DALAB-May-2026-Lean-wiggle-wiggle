@@ -43,3 +43,14 @@ macro "contrapositive" : tactic => `(tactic|
     guard_goal_nums 1
   )
 )
+
+open Lean.Elab.Tactic in
+macro "converse" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    revert_props
+    try (simp only [← and_imp])
+    apply (by admit : ∀ {p q : Prop}, (q → p) → (p → q))
+    guard_goal_nums 1
+  )
+)

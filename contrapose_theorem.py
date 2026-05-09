@@ -7,8 +7,8 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 LEAN_CODE = """\
 import Wiggle
 
--- Real.hasDerivAt_exp: contrapositive
-lemma to_contrapose (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
+-- Nat.gcd_eq_zero_iffp: contrapositive
+lemma to_contrapose {i j : Nat} : gcd i j = 0 ↔ i = 0 ∧ j = 0 := by
   contrapositive
   extract_goal
   sorry
