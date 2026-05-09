@@ -5,7 +5,7 @@ import re
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LEAN_CODE = """\
-import Negate
+import Wiggle
 
 -- Real.hasDerivAt_exp: contrapositive
 lemma to_contrapose (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by

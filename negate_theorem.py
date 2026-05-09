@@ -6,7 +6,7 @@ import tempfile  # Imported for temporary-file utilities, though not used below.
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # Absolute path to this project directory.
 
 LEAN_CODE = """\
-import Negate
+import Wiggle
 
 -- Real.hasDerivAt_exp negated
 lemma to_negate (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
