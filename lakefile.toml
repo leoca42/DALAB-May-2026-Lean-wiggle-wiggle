@@ -1,0 +1,21 @@
+name = "DALAB-May-2026-Lean-wiggle-wiggle"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["DALABMay2026LeanWiggleWiggle"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.29.1"
+
+[[lean_lib]]
+name = "Negate"
+
+[[lean_lib]]
+name = "DALABMay2026LeanWiggleWiggle"
