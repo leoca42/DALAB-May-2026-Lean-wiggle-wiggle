@@ -8,9 +8,8 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # Absolute path to thi
 LEAN_CODE = """\
 import Negate
 
--- hasSum_geometric_of_lt_one negated
-lemma to_negate {r : ℝ} (h₁ : 0 ≤ r) (h₂ : r < 1) :
-    HasSum (fun n : ℕ ↦ r ^ n) (1 - r)⁻¹ := by
+-- Real.hasDerivAt_exp negated
+lemma to_negate (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
   negate_state
   extract_goal
   sorry
