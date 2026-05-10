@@ -1,0 +1,4180 @@
+{
+  "declaration": "mul_self_nonneg",
+  "type": "∀ {R : Type u} [inst : Semiring R] [inst_1 : LinearOrder R] [ExistsAddOfLE R] [PosMulMono R] [AddLeftMono R] (a : R),\n  0 ≤ a * a",
+  "steps": 2,
+  "typeclasses": [
+    {
+      "typeclass": "Semiring R",
+      "head": "Semiring",
+      "weaker_downstream": [
+        {
+          "class": "(CategoryTheory.forget",
+          "distance": 1
+        },
+        {
+          "class": "(CategoryTheory.forget₂",
+          "distance": 1
+        },
+        {
+          "class": "(R",
+          "distance": 1
+        },
+        {
+          "class": "Add",
+          "distance": 1
+        },
+        {
+          "class": "AddCommMonoid",
+          "distance": 1
+        },
+        {
+          "class": "AddMonoidWithOne",
+          "distance": 1
+        },
+        {
+          "class": "Algebra",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.Category",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.HasForget₂",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.Limits.HasZeroMorphisms",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.Limits.HasZeroObject",
+          "distance": 1
+        },
+        {
+          "class": "Coe",
+          "distance": 1
+        },
+        {
+          "class": "CoeSort",
+          "distance": 1
+        },
+        {
+          "class": "CommSemiring",
+          "distance": 1
+        },
+        {
+          "class": "EquivLike",
+          "distance": 1
+        },
+        {
+          "class": "FaithfulSMul",
+          "distance": 1
+        },
+        {
+          "class": "Inhabited",
+          "distance": 1
+        },
+        {
+          "class": "Invertible",
+          "distance": 1
+        },
+        {
+          "class": "IsCoatomic",
+          "distance": 1
+        },
+        {
+          "class": "IsLocalHom",
+          "distance": 1
+        },
+        {
+          "class": "IsScalarTower",
+          "distance": 1
+        },
+        {
+          "class": "Lean.Grind.Semiring",
+          "distance": 1
+        },
+        {
+          "class": "Module",
+          "distance": 1
+        },
+        {
+          "class": "Module.Finite",
+          "distance": 1
+        },
+        {
+          "class": "Module.Free",
+          "distance": 1
+        },
+        {
+          "class": "Module.IsTorsionFree",
+          "distance": 1
+        },
+        {
+          "class": "Monoid",
+          "distance": 1
+        },
+        {
+          "class": "MonoidWithZero",
+          "distance": 1
+        },
+        {
+          "class": "Mul",
+          "distance": 1
+        },
+        {
+          "class": "MulSemiringAction",
+          "distance": 1
+        },
+        {
+          "class": "NatCast",
+          "distance": 1
+        },
+        {
+          "class": "NatPow",
+          "distance": 1
+        },
+        {
+          "class": "NonAssocSemiring",
+          "distance": 1
+        },
+        {
+          "class": "NonUnitalSemiring",
+          "distance": 1
+        },
+        {
+          "class": "NonUnitalSubsemiringClass",
+          "distance": 1
+        },
+        {
+          "class": "One",
+          "distance": 1
+        },
+        {
+          "class": "Polynomial",
+          "distance": 1
+        },
+        {
+          "class": "Pow",
+          "distance": 1
+        },
+        {
+          "class": "R",
+          "distance": 1
+        },
+        {
+          "class": "RingHomId",
+          "distance": 1
+        },
+        {
+          "class": "RingHomInvPair",
+          "distance": 1
+        },
+        {
+          "class": "RingHomSurjective",
+          "distance": 1
+        },
+        {
+          "class": "RingInvoClass",
+          "distance": 1
+        },
+        {
+          "class": "SMul",
+          "distance": 1
+        },
+        {
+          "class": "SMulCommClass",
+          "distance": 1
+        },
+        {
+          "class": "Submodule.IsPrincipal",
+          "distance": 1
+        },
+        {
+          "class": "Subsingleton",
+          "distance": 1
+        },
+        {
+          "class": "WellFoundedRelation",
+          "distance": 1
+        },
+        {
+          "class": "Zero",
+          "distance": 1
+        },
+        {
+          "class": "⊤.IsPrincipal",
+          "distance": 1
+        },
+        {
+          "class": "⊤.IsTwoSided",
+          "distance": 1
+        },
+        {
+          "class": "⊥.IsTwoSided",
+          "distance": 1
+        },
+        {
+          "class": "AddCommSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "AddGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddLeftMono",
+          "distance": 2
+        },
+        {
+          "class": "AddMemClass",
+          "distance": 2
+        },
+        {
+          "class": "AddRightMono",
+          "distance": 2
+        },
+        {
+          "class": "AddSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "AddZeroClass",
+          "distance": 2
+        },
+        {
+          "class": "Bot",
+          "distance": 2
+        },
+        {
+          "class": "CoeTC",
+          "distance": 2
+        },
+        {
+          "class": "CompleteLattice",
+          "distance": 2
+        },
+        {
+          "class": "Div",
+          "distance": 2
+        },
+        {
+          "class": "FunLike",
+          "distance": 2
+        },
+        {
+          "class": "Group",
+          "distance": 2
+        },
+        {
+          "class": "HAdd",
+          "distance": 2
+        },
+        {
+          "class": "InfSet",
+          "distance": 2
+        },
+        {
+          "class": "Inv",
+          "distance": 2
+        },
+        {
+          "class": "LE",
+          "distance": 2
+        },
+        {
+          "class": "Membership",
+          "distance": 2
+        },
+        {
+          "class": "Min",
+          "distance": 2
+        },
+        {
+          "class": "PartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "SetLike",
+          "distance": 2
+        },
+        {
+          "class": "Std.Refl",
+          "distance": 2
+        },
+        {
+          "class": "Top",
+          "distance": 2
+        },
+        {
+          "class": "VAdd",
+          "distance": 2
+        },
+        {
+          "class": "x",
+          "distance": 2
+        },
+        {
+          "class": "AddCommGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "AddOreLocalization.AddOreSet",
+          "distance": 2
+        },
+        {
+          "class": "CommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "IsDedekindFiniteAddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "IsTrans",
+          "distance": 2
+        },
+        {
+          "class": "Lean.Grind.NatModule",
+          "distance": 2
+        },
+        {
+          "class": "Neg",
+          "distance": 2
+        },
+        {
+          "class": "NoZeroDivisors",
+          "distance": 2
+        },
+        {
+          "class": "Std.Symm",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteProducts",
+          "distance": 2
+        },
+        {
+          "class": "IsLocalizedModule",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.BasedNatTrans.forgetful",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.CategoryOfElements.π",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Comonad.comparison",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Core.inclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Endofunctor.Algebra.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Endofunctor.Coalgebra.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.FreeGroupoid.of",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Functor.Fiber.inducedFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Functor.id",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Grothendieck.ι",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Idempotents.toKaroubi",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Ind.inclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Limits.FormalCoproduct.incl",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.LocalizerMorphism.id",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Monad.comparison",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.Over.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.Under.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.epimorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.isomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.monomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.regularEpi",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.regularMono",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.ObjectProperty.ιOfLE",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Over.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Precoverage.finite",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Pseudofunctor.CoGrothendieck.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Quotient.functor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Sheaf.canonicalTopology",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Under.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.comonadToFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.coyoneda.obj",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.decomposedTo",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.fromSkeleton",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.inducedFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.monadToFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.nerve",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.opOp",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.prod.leftUnitor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.prod.rightUnitor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.subterminalInclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.uliftCoyoneda",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.uliftYoneda",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.unopUnop",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.yoneda.obj",
+          "distance": 2
+        },
+        {
+          "class": "(P.colimitsCardinalClosure",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.evaluation",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.pushforward",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.restrictScalars",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.toPresheaf",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.forget",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.pushforward",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.restrictScalars",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.toSheaf",
+          "distance": 2
+        },
+        {
+          "class": "(TopCat.Sheaf.forget",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsAffine",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.PresheafedSpace.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.forgetToPresheafedSpace.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.forgetToPresheafedSpace.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Abelian",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory.IsLocallyDiscrete",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory.Strict",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CategoryStruct",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Closed",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ComonadicLeftAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimitsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.EnrichedCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Epi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functor.IsAccessible",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functor.IsDenseSubsite",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functorial",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Groupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HasSheafify",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomIsOver",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomRel.IsStableUnderPostcomp",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomRel.IsStableUnderPrecomp",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Ind.yoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Ind.yoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.InitiallySmall",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Injective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsCofiltered",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsConnected",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsCoreflexivePair",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsFiltered",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsFinitelyPresentable",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsGroupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsIdempotentComplete",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsIso",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsNormalEpiCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsNormalMonoCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsReflexivePair",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSifted",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSplitEpi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSplitMono",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasCoequalizer",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasColimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasCoproducts",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasEqualizer",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFilteredColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFiniteColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasImages",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasInitial",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasPullback",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasStrongEpiMonoFactorisations",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasTerminal",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesCofilteredLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFilteredColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimitsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.LocallySmall",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonObj",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonadicRightAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Mono",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCategoryStruct",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalClosed",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCoherence",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MorphismProperty.IsStableUnderFilteredColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ObjectProperty.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ObjectProperty.Small",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Over.map",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.OverClass",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Preadditive",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Presheaf.IsLocallyInjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Presheaf.IsLocallySurjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.PresheafIsFinite",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Projective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Pseudofunctor.CoGrothendieck.forget",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ReflQuiver",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.RepresentablyCoflat",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Sheaf.IsLocallyInjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Sheaf.IsLocallySurjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SimplicialCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SimplicialObject.IsCoskeletal",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SmallCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.StrongEpi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Subobject.representative.IsEquivalence",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithInitial.incl.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithInitial.incl.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithTerminal.incl.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithTerminal.incl.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.coyoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.coyoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.isArtinianObject.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.isNoetherianObject.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.uliftCoyoneda",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.uliftYoneda",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.yoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.yoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "CoeFun",
+          "distance": 2
+        },
+        {
+          "class": "CoeHead",
+          "distance": 2
+        },
+        {
+          "class": "CoeOut",
+          "distance": 2
+        },
+        {
+          "class": "CommGroup",
+          "distance": 2
+        },
+        {
+          "class": "CommRing",
+          "distance": 2
+        },
+        {
+          "class": "CompactSpace",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousInv",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousMul",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousSMul",
+          "distance": 2
+        },
+        {
+          "class": "DFunLike",
+          "distance": 2
+        },
+        {
+          "class": "DecidableEq",
+          "distance": 2
+        },
+        {
+          "class": "E.IsPreservedBy",
+          "distance": 2
+        },
+        {
+          "class": "E.Small",
+          "distance": 2
+        },
+        {
+          "class": "F.IsWellOrderContinuous",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.IsLeftAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.ReflectsIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "HasFibers",
+          "distance": 2
+        },
+        {
+          "class": "IsEmpty",
+          "distance": 2
+        },
+        {
+          "class": "IsMulCommutative",
+          "distance": 2
+        },
+        {
+          "class": "IsTopologicalGroup",
+          "distance": 2
+        },
+        {
+          "class": "J.IsGeneratedByOneHypercovers",
+          "distance": 2
+        },
+        {
+          "class": "J.WEqualsLocallyBijective",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.HasIsos",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.IsStableUnderComposition",
+          "distance": 2
+        },
+        {
+          "class": "Max",
+          "distance": 2
+        },
+        {
+          "class": "MulAction",
+          "distance": 2
+        },
+        {
+          "class": "Nonempty",
+          "distance": 2
+        },
+        {
+          "class": "Nontrivial",
+          "distance": 2
+        },
+        {
+          "class": "OrderTop",
+          "distance": 2
+        },
+        {
+          "class": "P.colimitsCardinalClosure",
+          "distance": 2
+        },
+        {
+          "class": "P.ind.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.IsStableUnderTransfiniteComposition",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.isoClosure.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "P.isoClosure.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.precoverage.Small",
+          "distance": 2
+        },
+        {
+          "class": "P.pullbacks.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.pullbacks.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.pushouts.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.pushouts.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.retractClosure.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "P.toCostructuredArrow.Final",
+          "distance": 2
+        },
+        {
+          "class": "P.universally.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.universally.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.ι.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "P.ι.Full",
+          "distance": 2
+        },
+        {
+          "class": "Preorder",
+          "distance": 2
+        },
+        {
+          "class": "PresheafOfModules.HasDifferentials",
+          "distance": 2
+        },
+        {
+          "class": "Quiver",
+          "distance": 2
+        },
+        {
+          "class": "Quiver.IsThin",
+          "distance": 2
+        },
+        {
+          "class": "Ring",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeInf",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeSup",
+          "distance": 2
+        },
+        {
+          "class": "Set",
+          "distance": 2
+        },
+        {
+          "class": "Setoid",
+          "distance": 2
+        },
+        {
+          "class": "Small",
+          "distance": 2
+        },
+        {
+          "class": "Sub",
+          "distance": 2
+        },
+        {
+          "class": "SupSet",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.IsRightAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.ReflectsIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderCoproductsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderProductsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "T2Space",
+          "distance": 2
+        },
+        {
+          "class": "TopologicalSpace",
+          "distance": 2
+        },
+        {
+          "class": "TotallyDisconnectedSpace",
+          "distance": 2
+        },
+        {
+          "class": "Trans",
+          "distance": 2
+        },
+        {
+          "class": "Unique",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.EssSurj",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.IsLocalization",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.op.IsLocalization",
+          "distance": 2
+        },
+        {
+          "class": "W.isColocal.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "W.isLocal.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "W.multiplicativeClosure'.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "W.multiplicativeClosure.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceBackward.IsCocontinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceBackward.IsContinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceForward.IsCocontinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceForward.IsContinuous",
+          "distance": 2
+        },
+        {
+          "class": "h.functor.IsEquivalence",
+          "distance": 2
+        },
+        {
+          "class": "↑↑Y",
+          "distance": 2
+        },
+        {
+          "class": "⊤.CodescendsAlong",
+          "distance": 2
+        },
+        {
+          "class": "⊤.DescendsAlong",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasOfPostcompProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasOfPrecompProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderQuotients",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsLocal",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsLocalAtSource",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "⊤.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "⊥.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "⊥.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "𝒴.p.IsHomLift",
+          "distance": 2
+        },
+        {
+          "class": "A",
+          "distance": 2
+        },
+        {
+          "class": "Algebra.IsCentral",
+          "distance": 2
+        },
+        {
+          "class": "Algebra.IsStandardOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "Bialgebra",
+          "distance": 2
+        },
+        {
+          "class": "BooleanAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SymmetricCategory",
+          "distance": 2
+        },
+        {
+          "class": "Coalgebra",
+          "distance": 2
+        },
+        {
+          "class": "Coalgebra.IsCocomm",
+          "distance": 2
+        },
+        {
+          "class": "CommMonoidWithZero",
+          "distance": 2
+        },
+        {
+          "class": "Decidable",
+          "distance": 2
+        },
+        {
+          "class": "Distrib",
+          "distance": 2
+        },
+        {
+          "class": "HopfAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "I.IsTwoSided",
+          "distance": 2
+        },
+        {
+          "class": "IdemCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "IsAzumaya",
+          "distance": 2
+        },
+        {
+          "class": "IsLocalization",
+          "distance": 2
+        },
+        {
+          "class": "IsLocalization.Away",
+          "distance": 2
+        },
+        {
+          "class": "IsPRadical",
+          "distance": 2
+        },
+        {
+          "class": "IsStablyFiniteRing",
+          "distance": 2
+        },
+        {
+          "class": "LT",
+          "distance": 2
+        },
+        {
+          "class": "LawfulFunctor",
+          "distance": 2
+        },
+        {
+          "class": "LawfulMonad",
+          "distance": 2
+        },
+        {
+          "class": "Lean.Grind.CommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "Module.Flat",
+          "distance": 2
+        },
+        {
+          "class": "Module.Invertible",
+          "distance": 2
+        },
+        {
+          "class": "Monad",
+          "distance": 2
+        },
+        {
+          "class": "NonAssocCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "PrespectralSpace",
+          "distance": 2
+        },
+        {
+          "class": "QuasiSeparatedSpace",
+          "distance": 2
+        },
+        {
+          "class": "QuasiSober",
+          "distance": 2
+        },
+        {
+          "class": "SetLike.GradedMonoid",
+          "distance": 2
+        },
+        {
+          "class": "SpectralSpace",
+          "distance": 2
+        },
+        {
+          "class": "StarRing",
+          "distance": 2
+        },
+        {
+          "class": "T0Space",
+          "distance": 2
+        },
+        {
+          "class": "self.asIdeal.IsMaximal",
+          "distance": 2
+        },
+        {
+          "class": "self.asIdeal.IsPrime",
+          "distance": 2
+        },
+        {
+          "class": "EmbeddingLike",
+          "distance": 2
+        },
+        {
+          "class": "EmptyCollection",
+          "distance": 2
+        },
+        {
+          "class": "GetElem",
+          "distance": 2
+        },
+        {
+          "class": "Std.Internal.Async.IO.AsyncRead",
+          "distance": 2
+        },
+        {
+          "class": "Std.Internal.Async.IO.AsyncStream",
+          "distance": 2
+        },
+        {
+          "class": "Std.Internal.Async.IO.AsyncWrite",
+          "distance": 2
+        },
+        {
+          "class": "HPow",
+          "distance": 2
+        },
+        {
+          "class": "Lean.Grind.Ring",
+          "distance": 2
+        },
+        {
+          "class": "OfNat",
+          "distance": 2
+        },
+        {
+          "class": "DistribMulAction",
+          "distance": 2
+        },
+        {
+          "class": "MulActionWithZero",
+          "distance": 2
+        },
+        {
+          "class": "CanLift",
+          "distance": 2
+        },
+        {
+          "class": "DecidablePred",
+          "distance": 2
+        },
+        {
+          "class": "DivInvMonoid",
+          "distance": 2
+        },
+        {
+          "class": "IdemSemiring",
+          "distance": 2
+        },
+        {
+          "class": "LawfulApplicative",
+          "distance": 2
+        },
+        {
+          "class": "Monoid.FG",
+          "distance": 2
+        },
+        {
+          "class": "MonoidHom.CompTriple.IsId",
+          "distance": 2
+        },
+        {
+          "class": "MulDistribMulAction",
+          "distance": 2
+        },
+        {
+          "class": "MulOneClass",
+          "distance": 2
+        },
+        {
+          "class": "NatPowAssoc",
+          "distance": 2
+        },
+        {
+          "class": "OreLocalization.OreSet",
+          "distance": 2
+        },
+        {
+          "class": "Semigroup",
+          "distance": 2
+        },
+        {
+          "class": "MulZeroOneClass",
+          "distance": 2
+        },
+        {
+          "class": "SemigroupWithZero",
+          "distance": 2
+        },
+        {
+          "class": "CommSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "HMul",
+          "distance": 2
+        },
+        {
+          "class": "MulLeftMono",
+          "distance": 2
+        },
+        {
+          "class": "MulMemClass",
+          "distance": 2
+        },
+        {
+          "class": "MulRightMono",
+          "distance": 2
+        },
+        {
+          "class": "MulZeroClass",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocRing",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocSemiring",
+          "distance": 2
+        },
+        {
+          "class": "CoeHTCT",
+          "distance": 2
+        },
+        {
+          "class": "CoeTail",
+          "distance": 2
+        },
+        {
+          "class": "AddCommMonoidWithOne",
+          "distance": 2
+        },
+        {
+          "class": "CharP",
+          "distance": 2
+        },
+        {
+          "class": "SubsemiringClass",
+          "distance": 2
+        },
+        {
+          "class": "AddSubmonoidClass",
+          "distance": 2
+        },
+        {
+          "class": "Fintype",
+          "distance": 2
+        },
+        {
+          "class": "RingEquivClass",
+          "distance": 2
+        },
+        {
+          "class": "CovariantClass",
+          "distance": 2
+        },
+        {
+          "class": "HSMul",
+          "distance": 2
+        },
+        {
+          "class": "SMulMemClass",
+          "distance": 2
+        },
+        {
+          "class": "X",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsClosedImmersion",
+          "distance": 2
+        },
+        {
+          "class": "Countable",
+          "distance": 2
+        },
+        {
+          "class": "Finite",
+          "distance": 2
+        },
+        {
+          "class": "IsWellOrder",
+          "distance": 2
+        },
+        {
+          "class": "ProbabilityTheory.Kernel.IsIrreducible",
+          "distance": 2
+        },
+        {
+          "class": "IsWellFounded",
+          "distance": 2
+        },
+        {
+          "class": "Std.Asymm",
+          "distance": 2
+        },
+        {
+          "class": "SMulWithZero",
+          "distance": 2
+        },
+        {
+          "class": "SMulZeroClass",
+          "distance": 2
+        }
+      ],
+      "stronger_upstream": [
+        {
+          "class": "AddCommMonoid",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.Category",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.SmallCategory",
+          "distance": 1
+        },
+        {
+          "class": "CommRing",
+          "distance": 1
+        },
+        {
+          "class": "CommSemiring",
+          "distance": 1
+        },
+        {
+          "class": "DivisionSemiring",
+          "distance": 1
+        },
+        {
+          "class": "I",
+          "distance": 1
+        },
+        {
+          "class": "IdemSemiring",
+          "distance": 1
+        },
+        {
+          "class": "NonUnitalNonAssocSemiring",
+          "distance": 1
+        },
+        {
+          "class": "NonUnitalSemiring",
+          "distance": 1
+        },
+        {
+          "class": "Ring",
+          "distance": 1
+        },
+        {
+          "class": "AddCancelCommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "AddCommGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddCommMonoidWithOne",
+          "distance": 2
+        },
+        {
+          "class": "AddCommSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "AddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "CommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedAddCommGroupWithTop",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedAddCommMonoidWithTop",
+          "distance": 2
+        },
+        {
+          "class": "MeasurableSpace",
+          "distance": 2
+        },
+        {
+          "class": "NeZero",
+          "distance": 2
+        },
+        {
+          "class": "SubtractionCommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "i",
+          "distance": 2
+        },
+        {
+          "class": "m",
+          "distance": 2
+        },
+        {
+          "class": "x",
+          "distance": 2
+        },
+        {
+          "class": "ι",
+          "distance": 2
+        },
+        {
+          "class": "A.Quasicategory₂",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.EnrichedCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Groupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ReflQuiver",
+          "distance": 2
+        },
+        {
+          "class": "HasFibers",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrder",
+          "distance": 2
+        },
+        {
+          "class": "Monoid",
+          "distance": 2
+        },
+        {
+          "class": "Quiver",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CategoryStruct",
+          "distance": 2
+        },
+        {
+          "class": "Preorder",
+          "distance": 2
+        },
+        {
+          "class": "BooleanRing",
+          "distance": 2
+        },
+        {
+          "class": "EuclideanDomain",
+          "distance": 2
+        },
+        {
+          "class": "Field",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalCommRing",
+          "distance": 2
+        },
+        {
+          "class": "NormedCommRing",
+          "distance": 2
+        },
+        {
+          "class": "SeminormedCommRing",
+          "distance": 2
+        },
+        {
+          "class": "Subsingleton",
+          "distance": 2
+        },
+        {
+          "class": "IdemCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "Semifield",
+          "distance": 2
+        },
+        {
+          "class": "DivisionRing",
+          "distance": 2
+        },
+        {
+          "class": "KleeneAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "Mul",
+          "distance": 2
+        },
+        {
+          "class": "NonAssocSemiring",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocCommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocRing",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalRing",
+          "distance": 2
+        },
+        {
+          "class": "Semigroup",
+          "distance": 2
+        },
+        {
+          "class": "NormedRing",
+          "distance": 2
+        },
+        {
+          "class": "SeminormedRing",
+          "distance": 2
+        }
+      ]
+    },
+    {
+      "typeclass": "LinearOrder R",
+      "head": "LinearOrder",
+      "weaker_downstream": [
+        {
+          "class": "(Set.uIcc",
+          "distance": 1
+        },
+        {
+          "class": "(Set.uIoc",
+          "distance": 1
+        },
+        {
+          "class": "(s.ordConnectedComponent",
+          "distance": 1
+        },
+        {
+          "class": "Add",
+          "distance": 1
+        },
+        {
+          "class": "AddCommSemigroup",
+          "distance": 1
+        },
+        {
+          "class": "AddLeftMono",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.Category",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.CategoryStruct",
+          "distance": 1
+        },
+        {
+          "class": "CategoryTheory.SimplicialCategory",
+          "distance": 1
+        },
+        {
+          "class": "CompleteLinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "DecidableEq",
+          "distance": 1
+        },
+        {
+          "class": "DecidableLE",
+          "distance": 1
+        },
+        {
+          "class": "DecidableLT",
+          "distance": 1
+        },
+        {
+          "class": "DecidableRel",
+          "distance": 1
+        },
+        {
+          "class": "DistribLattice",
+          "distance": 1
+        },
+        {
+          "class": "Filter.TendstoIxxClass",
+          "distance": 1
+        },
+        {
+          "class": "Fintype",
+          "distance": 1
+        },
+        {
+          "class": "IsEmpty",
+          "distance": 1
+        },
+        {
+          "class": "IsLinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "IsOrderedCancelAddMonoid",
+          "distance": 1
+        },
+        {
+          "class": "IsStrictOrder",
+          "distance": 1
+        },
+        {
+          "class": "IsStrictTotalOrder",
+          "distance": 1
+        },
+        {
+          "class": "LE",
+          "distance": 1
+        },
+        {
+          "class": "Lattice",
+          "distance": 1
+        },
+        {
+          "class": "Max",
+          "distance": 1
+        },
+        {
+          "class": "Min",
+          "distance": 1
+        },
+        {
+          "class": "Ord",
+          "distance": 1
+        },
+        {
+          "class": "OrderBot",
+          "distance": 1
+        },
+        {
+          "class": "PartialOrder",
+          "distance": 1
+        },
+        {
+          "class": "Std.Associative",
+          "distance": 1
+        },
+        {
+          "class": "Std.Commutative",
+          "distance": 1
+        },
+        {
+          "class": "Std.IdempotentOp",
+          "distance": 1
+        },
+        {
+          "class": "Std.IsLinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "Std.LawfulBCmp",
+          "distance": 1
+        },
+        {
+          "class": "Std.LawfulOrderInf",
+          "distance": 1
+        },
+        {
+          "class": "Std.LawfulOrderSup",
+          "distance": 1
+        },
+        {
+          "class": "Std.Total",
+          "distance": 1
+        },
+        {
+          "class": "Std.Trichotomous",
+          "distance": 1
+        },
+        {
+          "class": "Unique",
+          "distance": 1
+        },
+        {
+          "class": "⋯.functor.Final",
+          "distance": 1
+        },
+        {
+          "class": "AddGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddMemClass",
+          "distance": 2
+        },
+        {
+          "class": "AddRightMono",
+          "distance": 2
+        },
+        {
+          "class": "AddSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "AddZeroClass",
+          "distance": 2
+        },
+        {
+          "class": "Bot",
+          "distance": 2
+        },
+        {
+          "class": "CoeTC",
+          "distance": 2
+        },
+        {
+          "class": "CompleteLattice",
+          "distance": 2
+        },
+        {
+          "class": "Div",
+          "distance": 2
+        },
+        {
+          "class": "FunLike",
+          "distance": 2
+        },
+        {
+          "class": "Group",
+          "distance": 2
+        },
+        {
+          "class": "HAdd",
+          "distance": 2
+        },
+        {
+          "class": "InfSet",
+          "distance": 2
+        },
+        {
+          "class": "Inhabited",
+          "distance": 2
+        },
+        {
+          "class": "Inv",
+          "distance": 2
+        },
+        {
+          "class": "Membership",
+          "distance": 2
+        },
+        {
+          "class": "Monoid",
+          "distance": 2
+        },
+        {
+          "class": "Mul",
+          "distance": 2
+        },
+        {
+          "class": "One",
+          "distance": 2
+        },
+        {
+          "class": "Pow",
+          "distance": 2
+        },
+        {
+          "class": "SetLike",
+          "distance": 2
+        },
+        {
+          "class": "Std.Refl",
+          "distance": 2
+        },
+        {
+          "class": "Top",
+          "distance": 2
+        },
+        {
+          "class": "VAdd",
+          "distance": 2
+        },
+        {
+          "class": "x",
+          "distance": 2
+        },
+        {
+          "class": "AddCommMagma",
+          "distance": 2
+        },
+        {
+          "class": "AddCommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "CommSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "IsCentralVAdd",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.BasedNatTrans.forgetful",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.CategoryOfElements.π",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Comonad.comparison",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Core.inclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Endofunctor.Algebra.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Endofunctor.Coalgebra.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.FreeGroupoid.of",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Functor.Fiber.inducedFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Functor.id",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Grothendieck.ι",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Idempotents.toKaroubi",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Ind.inclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Limits.FormalCoproduct.incl",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.LocalizerMorphism.id",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Monad.comparison",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.Over.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.Under.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.epimorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.isomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.monomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.regularEpi",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.MorphismProperty.regularMono",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.ObjectProperty.ιOfLE",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Over.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Precoverage.finite",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Pseudofunctor.CoGrothendieck.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Quotient.functor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Sheaf.canonicalTopology",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.Under.forget",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.comonadToFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.coyoneda.obj",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.decomposedTo",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.fromSkeleton",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.inducedFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.monadToFunctor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.nerve",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.opOp",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.prod.leftUnitor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.prod.rightUnitor",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.subterminalInclusion",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.uliftCoyoneda",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.uliftYoneda",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.unopUnop",
+          "distance": 2
+        },
+        {
+          "class": "(CategoryTheory.yoneda.obj",
+          "distance": 2
+        },
+        {
+          "class": "(P.colimitsCardinalClosure",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.evaluation",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.pushforward",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.restrictScalars",
+          "distance": 2
+        },
+        {
+          "class": "(PresheafOfModules.toPresheaf",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.forget",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.pushforward",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.restrictScalars",
+          "distance": 2
+        },
+        {
+          "class": "(SheafOfModules.toSheaf",
+          "distance": 2
+        },
+        {
+          "class": "(TopCat.Sheaf.forget",
+          "distance": 2
+        },
+        {
+          "class": "AddCommGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsAffine",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.PresheafedSpace.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.IsOpenImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.forgetToPresheafedSpace.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.SheafedSpace.forgetToPresheafedSpace.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Abelian",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory.IsLocallyDiscrete",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Bicategory.Strict",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Closed",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ComonadicLeftAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimitsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.CreatesLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.EnrichedCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Epi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functor.IsAccessible",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functor.IsDenseSubsite",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Functorial",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Groupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HasSheafify",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomIsOver",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomRel.IsStableUnderPostcomp",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.HomRel.IsStableUnderPrecomp",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Ind.yoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Ind.yoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.InitiallySmall",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Injective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsCofiltered",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsConnected",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsCoreflexivePair",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsFiltered",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsFinitelyPresentable",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsGroupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsIdempotentComplete",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsIso",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsNormalEpiCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsNormalMonoCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsReflexivePair",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSifted",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSplitEpi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.IsSplitMono",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasCoequalizer",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasColimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasCoproducts",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasEqualizer",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFilteredColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFiniteColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasImages",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasInitial",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasPullback",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasStrongEpiMonoFactorisations",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.HasTerminal",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesCofilteredLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFilteredColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesFiniteProducts",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimit",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimitsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.PreservesLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsColimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsFiniteLimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Limits.ReflectsLimitsOfSize",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.LocallySmall",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonObj",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonadicRightAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Mono",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCategoryStruct",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalClosed",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MonoidalCoherence",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.MorphismProperty.IsStableUnderFilteredColimits",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ObjectProperty.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ObjectProperty.Small",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Over.map",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.OverClass",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Preadditive",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Presheaf.IsLocallyInjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Presheaf.IsLocallySurjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.PresheafIsFinite",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Projective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Pseudofunctor.CoGrothendieck.forget",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.ReflQuiver",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.RepresentablyCoflat",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Sheaf.IsLocallyInjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Sheaf.IsLocallySurjective",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SimplicialObject.IsCoskeletal",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SmallCategory",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.StrongEpi",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Subobject.representative.IsEquivalence",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithInitial.incl.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithInitial.incl.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithTerminal.incl.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.WithTerminal.incl.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.coyoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.coyoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.isArtinianObject.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.isNoetherianObject.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.uliftCoyoneda",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.uliftYoneda",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.yoneda.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.yoneda.Full",
+          "distance": 2
+        },
+        {
+          "class": "Coe",
+          "distance": 2
+        },
+        {
+          "class": "CoeFun",
+          "distance": 2
+        },
+        {
+          "class": "CoeHead",
+          "distance": 2
+        },
+        {
+          "class": "CoeOut",
+          "distance": 2
+        },
+        {
+          "class": "CoeSort",
+          "distance": 2
+        },
+        {
+          "class": "CommGroup",
+          "distance": 2
+        },
+        {
+          "class": "CommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "CommRing",
+          "distance": 2
+        },
+        {
+          "class": "CommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "CompactSpace",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousInv",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousMul",
+          "distance": 2
+        },
+        {
+          "class": "ContinuousSMul",
+          "distance": 2
+        },
+        {
+          "class": "DFunLike",
+          "distance": 2
+        },
+        {
+          "class": "E.IsPreservedBy",
+          "distance": 2
+        },
+        {
+          "class": "E.Small",
+          "distance": 2
+        },
+        {
+          "class": "F.IsWellOrderContinuous",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.IsLeftAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "G.forget.ReflectsIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "HasFibers",
+          "distance": 2
+        },
+        {
+          "class": "IsMulCommutative",
+          "distance": 2
+        },
+        {
+          "class": "IsTopologicalGroup",
+          "distance": 2
+        },
+        {
+          "class": "J.IsGeneratedByOneHypercovers",
+          "distance": 2
+        },
+        {
+          "class": "J.WEqualsLocallyBijective",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.HasIsos",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "J.toPrecoverage.IsStableUnderComposition",
+          "distance": 2
+        },
+        {
+          "class": "Module",
+          "distance": 2
+        },
+        {
+          "class": "MulAction",
+          "distance": 2
+        },
+        {
+          "class": "Neg",
+          "distance": 2
+        },
+        {
+          "class": "Nonempty",
+          "distance": 2
+        },
+        {
+          "class": "Nontrivial",
+          "distance": 2
+        },
+        {
+          "class": "OrderTop",
+          "distance": 2
+        },
+        {
+          "class": "P.colimitsCardinalClosure",
+          "distance": 2
+        },
+        {
+          "class": "P.ind.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "P.isColocal.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.IsStableUnderTransfiniteComposition",
+          "distance": 2
+        },
+        {
+          "class": "P.isLocal.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.isoClosure.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "P.isoClosure.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.precoverage.Small",
+          "distance": 2
+        },
+        {
+          "class": "P.pullbacks.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.pullbacks.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.pushouts.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.pushouts.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.retractClosure.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "P.toCostructuredArrow.Final",
+          "distance": 2
+        },
+        {
+          "class": "P.universally.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "P.universally.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "P.ι.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "P.ι.Full",
+          "distance": 2
+        },
+        {
+          "class": "Preorder",
+          "distance": 2
+        },
+        {
+          "class": "PresheafOfModules.HasDifferentials",
+          "distance": 2
+        },
+        {
+          "class": "Quiver",
+          "distance": 2
+        },
+        {
+          "class": "Quiver.IsThin",
+          "distance": 2
+        },
+        {
+          "class": "Ring",
+          "distance": 2
+        },
+        {
+          "class": "SMul",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeInf",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeSup",
+          "distance": 2
+        },
+        {
+          "class": "Semiring",
+          "distance": 2
+        },
+        {
+          "class": "Set",
+          "distance": 2
+        },
+        {
+          "class": "Setoid",
+          "distance": 2
+        },
+        {
+          "class": "Small",
+          "distance": 2
+        },
+        {
+          "class": "Sub",
+          "distance": 2
+        },
+        {
+          "class": "Subsingleton",
+          "distance": 2
+        },
+        {
+          "class": "SupSet",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.Faithful",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.IsRightAdjoint",
+          "distance": 2
+        },
+        {
+          "class": "T.forget.ReflectsIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderCoproductsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "T.llp.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderProductsOfShape",
+          "distance": 2
+        },
+        {
+          "class": "T.rlp.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "T2Space",
+          "distance": 2
+        },
+        {
+          "class": "TopologicalSpace",
+          "distance": 2
+        },
+        {
+          "class": "TotallyDisconnectedSpace",
+          "distance": 2
+        },
+        {
+          "class": "Trans",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.EssSurj",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.IsLocalization",
+          "distance": 2
+        },
+        {
+          "class": "W.Q.op.IsLocalization",
+          "distance": 2
+        },
+        {
+          "class": "W.isColocal.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "W.isLocal.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "W.multiplicativeClosure'.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "W.multiplicativeClosure.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "Zero",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceBackward.IsCocontinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceBackward.IsContinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceForward.IsCocontinuous",
+          "distance": 2
+        },
+        {
+          "class": "f.iteratedSliceForward.IsContinuous",
+          "distance": 2
+        },
+        {
+          "class": "h.functor.IsEquivalence",
+          "distance": 2
+        },
+        {
+          "class": "↑↑Y",
+          "distance": 2
+        },
+        {
+          "class": "⊤.CodescendsAlong",
+          "distance": 2
+        },
+        {
+          "class": "⊤.DescendsAlong",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasOfPostcompProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasOfPrecompProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.HasTwoOutOfThreeProperty",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderQuotients",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsClosedUnderSubobjects",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsLocal",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsLocalAtSource",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsMultiplicative",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderBaseChange",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderCobaseChange",
+          "distance": 2
+        },
+        {
+          "class": "⊤.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "⊤.RespectsIso",
+          "distance": 2
+        },
+        {
+          "class": "⊥.IsClosedUnderIsomorphisms",
+          "distance": 2
+        },
+        {
+          "class": "⊥.IsStableUnderRetracts",
+          "distance": 2
+        },
+        {
+          "class": "𝒴.p.IsHomLift",
+          "distance": 2
+        },
+        {
+          "class": "CompleteBooleanAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "BiheytingAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "CompletelyDistribLattice",
+          "distance": 2
+        },
+        {
+          "class": "ConditionallyCompleteLinearOrderBot",
+          "distance": 2
+        },
+        {
+          "class": "BEq",
+          "distance": 2
+        },
+        {
+          "class": "Decidable",
+          "distance": 2
+        },
+        {
+          "class": "DecidablePred",
+          "distance": 2
+        },
+        {
+          "class": "FinEnum",
+          "distance": 2
+        },
+        {
+          "class": "Finset.HasAntidiagonal",
+          "distance": 2
+        },
+        {
+          "class": "GeneralizedBooleanAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "Insert",
+          "distance": 2
+        },
+        {
+          "class": "Inter",
+          "distance": 2
+        },
+        {
+          "class": "LawfulBEq",
+          "distance": 2
+        },
+        {
+          "class": "LawfulSingleton",
+          "distance": 2
+        },
+        {
+          "class": "LocallyFiniteOrder",
+          "distance": 2
+        },
+        {
+          "class": "OrderedSub",
+          "distance": 2
+        },
+        {
+          "class": "RightCommutative",
+          "distance": 2
+        },
+        {
+          "class": "SDiff",
+          "distance": 2
+        },
+        {
+          "class": "Union",
+          "distance": 2
+        },
+        {
+          "class": "IsModularLattice",
+          "distance": 2
+        },
+        {
+          "class": "(BoxIntegral.IntegrationParams.toFilteriUnion",
+          "distance": 2
+        },
+        {
+          "class": "(l.toFilter",
+          "distance": 2
+        },
+        {
+          "class": "(l.toFilterDistortion",
+          "distance": 2
+        },
+        {
+          "class": "(l.toFilterDistortioniUnion",
+          "distance": 2
+        },
+        {
+          "class": "BoundedOrder",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.FinCategory",
+          "distance": 2
+        },
+        {
+          "class": "DiffeologicalSpace",
+          "distance": 2
+        },
+        {
+          "class": "Finite",
+          "distance": 2
+        },
+        {
+          "class": "(FirstOrder.Language.constantsOn",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsClosedImmersion",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsLocallyArtinian",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.QuasiCompactCover",
+          "distance": 2
+        },
+        {
+          "class": "Encodable",
+          "distance": 2
+        },
+        {
+          "class": "IsWellOrder",
+          "distance": 2
+        },
+        {
+          "class": "L.LeAtTop",
+          "distance": 2
+        },
+        {
+          "class": "MeasureTheory.IsFiniteMeasure",
+          "distance": 2
+        },
+        {
+          "class": "ProbabilityTheory.IsMarkovKernel",
+          "distance": 2
+        },
+        {
+          "class": "ProbabilityTheory.IsZeroOrMarkovKernel",
+          "distance": 2
+        },
+        {
+          "class": "IsPartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "IsOrderedAddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "IsTrans",
+          "distance": 2
+        },
+        {
+          "class": "Std.Irrefl",
+          "distance": 2
+        },
+        {
+          "class": "IsOrderConnected",
+          "distance": 2
+        },
+        {
+          "class": "CanLift",
+          "distance": 2
+        },
+        {
+          "class": "Std.LawfulOrderBEq",
+          "distance": 2
+        },
+        {
+          "class": "Std.LawfulOrderLT",
+          "distance": 2
+        },
+        {
+          "class": "Std.LawfulIdentity",
+          "distance": 2
+        },
+        {
+          "class": "LT",
+          "distance": 2
+        },
+        {
+          "class": "Std.Internal.IsStrictCut",
+          "distance": 2
+        },
+        {
+          "class": "Std.Iterator",
+          "distance": 2
+        },
+        {
+          "class": "Std.Iterators.Finite",
+          "distance": 2
+        },
+        {
+          "class": "Std.Rcc.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Rci.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Rco.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Ric.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Rio.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Roc.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Roi.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.Roo.Sliceable",
+          "distance": 2
+        },
+        {
+          "class": "Std.ToIterator",
+          "distance": 2
+        },
+        {
+          "class": "Std.Antisymm",
+          "distance": 2
+        },
+        {
+          "class": "Std.IsPartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "{a}.OrdConnected",
+          "distance": 2
+        },
+        {
+          "class": "α",
+          "distance": 2
+        },
+        {
+          "class": "𝓕.rightCont.IsRightContinuous",
+          "distance": 2
+        },
+        {
+          "class": "IsSymmOp",
+          "distance": 2
+        },
+        {
+          "class": "Std.LawfulBEqCmp",
+          "distance": 2
+        },
+        {
+          "class": "Std.TransCmp",
+          "distance": 2
+        },
+        {
+          "class": "IsDirected",
+          "distance": 2
+        },
+        {
+          "class": "Std.Asymm",
+          "distance": 2
+        },
+        {
+          "class": "IsAddCyclic",
+          "distance": 2
+        },
+        {
+          "class": "IsCyclic",
+          "distance": 2
+        }
+      ],
+      "stronger_upstream": [
+        {
+          "class": "CompleteLinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "ConditionallyCompleteLinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "Field",
+          "distance": 1
+        },
+        {
+          "class": "LinearOrderedAddCommGroupWithTop",
+          "distance": 1
+        },
+        {
+          "class": "LinearOrderedAddCommMonoidWithTop",
+          "distance": 1
+        },
+        {
+          "class": "LinearOrderedCommMonoidWithZero",
+          "distance": 1
+        },
+        {
+          "class": "PartialOrder",
+          "distance": 1
+        },
+        {
+          "class": "Zsqrtd.Nonsquare",
+          "distance": 1
+        },
+        {
+          "class": "ConditionallyCompleteLinearOrderBot",
+          "distance": 2
+        },
+        {
+          "class": "NeZero",
+          "distance": 2
+        },
+        {
+          "class": "AlgebraicGeometry.IsIntegral",
+          "distance": 2
+        },
+        {
+          "class": "DivisionRing",
+          "distance": 2
+        },
+        {
+          "class": "Fact",
+          "distance": 2
+        },
+        {
+          "class": "NormedField",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedCommGroupWithZero",
+          "distance": 2
+        },
+        {
+          "class": "Add",
+          "distance": 2
+        },
+        {
+          "class": "AddCommGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddZeroClass",
+          "distance": 2
+        },
+        {
+          "class": "BooleanAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Category",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Groupoid",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SmallCategory",
+          "distance": 2
+        },
+        {
+          "class": "ChainCompletePartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "CommGroup",
+          "distance": 2
+        },
+        {
+          "class": "CommRing",
+          "distance": 2
+        },
+        {
+          "class": "CommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "CompleteLattice",
+          "distance": 2
+        },
+        {
+          "class": "CompletePartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "CompleteSemilatticeInf",
+          "distance": 2
+        },
+        {
+          "class": "CompleteSemilatticeSup",
+          "distance": 2
+        },
+        {
+          "class": "ConditionallyCompletePartialOrderInf",
+          "distance": 2
+        },
+        {
+          "class": "ConditionallyCompletePartialOrderSup",
+          "distance": 2
+        },
+        {
+          "class": "GeneralizedBooleanAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "Group",
+          "distance": 2
+        },
+        {
+          "class": "HeytingAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "InfSet",
+          "distance": 2
+        },
+        {
+          "class": "L.Structure",
+          "distance": 2
+        },
+        {
+          "class": "LE",
+          "distance": 2
+        },
+        {
+          "class": "Lattice",
+          "distance": 2
+        },
+        {
+          "class": "Mul",
+          "distance": 2
+        },
+        {
+          "class": "MulOneClass",
+          "distance": 2
+        },
+        {
+          "class": "NonAssocRing",
+          "distance": 2
+        },
+        {
+          "class": "NonAssocSemiring",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalCStarAlgebra",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocRing",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocSemiring",
+          "distance": 2
+        },
+        {
+          "class": "OmegaCompletePartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "Order.Frame",
+          "distance": 2
+        },
+        {
+          "class": "Preorder",
+          "distance": 2
+        },
+        {
+          "class": "Ring",
+          "distance": 2
+        },
+        {
+          "class": "SMul",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeInf",
+          "distance": 2
+        },
+        {
+          "class": "SemilatticeSup",
+          "distance": 2
+        },
+        {
+          "class": "SupSet",
+          "distance": 2
+        },
+        {
+          "class": "TopologicalSpace",
+          "distance": 2
+        },
+        {
+          "class": "VAdd",
+          "distance": 2
+        },
+        {
+          "class": "ι",
+          "distance": 2
+        }
+      ]
+    },
+    {
+      "typeclass": "ExistsAddOfLE R",
+      "head": "ExistsAddOfLE",
+      "weaker_downstream": [],
+      "stronger_upstream": [
+        {
+          "class": "CanonicallyOrderedAdd",
+          "distance": 1
+        },
+        {
+          "class": "IdemSemiring",
+          "distance": 2
+        }
+      ]
+    },
+    {
+      "typeclass": "PosMulMono R",
+      "head": "PosMulMono",
+      "weaker_downstream": [],
+      "stronger_upstream": [
+        {
+          "class": "IsOrderedRing",
+          "distance": 1
+        },
+        {
+          "class": "CommMonoid",
+          "distance": 2
+        }
+      ]
+    },
+    {
+      "typeclass": "AddLeftMono R",
+      "head": "AddLeftMono",
+      "weaker_downstream": [],
+      "stronger_upstream": [
+        {
+          "class": "Add",
+          "distance": 1
+        },
+        {
+          "class": "LinearOrder",
+          "distance": 1
+        },
+        {
+          "class": "AddCommMagma",
+          "distance": 2
+        },
+        {
+          "class": "AddCommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "AddGroup",
+          "distance": 2
+        },
+        {
+          "class": "AddMonoid",
+          "distance": 2
+        },
+        {
+          "class": "AddSemigroup",
+          "distance": 2
+        },
+        {
+          "class": "AddZero",
+          "distance": 2
+        },
+        {
+          "class": "AddZeroClass",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.Category",
+          "distance": 2
+        },
+        {
+          "class": "CategoryTheory.SmallCategory",
+          "distance": 2
+        },
+        {
+          "class": "CommRing",
+          "distance": 2
+        },
+        {
+          "class": "CommSemiring",
+          "distance": 2
+        },
+        {
+          "class": "Distrib",
+          "distance": 2
+        },
+        {
+          "class": "FP.FloatCfg",
+          "distance": 2
+        },
+        {
+          "class": "Field",
+          "distance": 2
+        },
+        {
+          "class": "Group",
+          "distance": 2
+        },
+        {
+          "class": "Lean.Grind.AddCommMonoid",
+          "distance": 2
+        },
+        {
+          "class": "Lean.Grind.Semiring",
+          "distance": 2
+        },
+        {
+          "class": "MeasurableSpace",
+          "distance": 2
+        },
+        {
+          "class": "Mul",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocRing",
+          "distance": 2
+        },
+        {
+          "class": "NonUnitalNonAssocSemiring",
+          "distance": 2
+        },
+        {
+          "class": "Ring",
+          "distance": 2
+        },
+        {
+          "class": "Semiring",
+          "distance": 2
+        },
+        {
+          "class": "i",
+          "distance": 2
+        },
+        {
+          "class": "m",
+          "distance": 2
+        },
+        {
+          "class": "ι",
+          "distance": 2
+        },
+        {
+          "class": "CompleteLinearOrder",
+          "distance": 2
+        },
+        {
+          "class": "ConditionallyCompleteLinearOrder",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedAddCommGroupWithTop",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedAddCommMonoidWithTop",
+          "distance": 2
+        },
+        {
+          "class": "LinearOrderedCommMonoidWithZero",
+          "distance": 2
+        },
+        {
+          "class": "PartialOrder",
+          "distance": 2
+        },
+        {
+          "class": "Zsqrtd.Nonsquare",
+          "distance": 2
+        }
+      ]
+    }
+  ]
+}

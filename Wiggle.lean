@@ -19,8 +19,28 @@ def jsonField (key value : String) : String :=
 def jsonNatField (key : String) (value : Nat) : String :=
   "\"" ++ jsonEscape key ++ "\":" ++ toString value
 
+def jsonRawField (key value : String) : String :=
+  "\"" ++ jsonEscape key ++ "\":" ++ value
+
 def jsonObject (fields : List String) : String :=
   "{" ++ String.intercalate "," fields ++ "}"
+
+open Lean Meta in
+partial def instImplicitBinderTypes (type : Expr) : MetaM (Array String) := do
+  match type with
+  | .forallE name domain body binderInfo =>
+      let domain ← instantiateMVars domain
+      let domainText? ← match binderInfo with
+        | .instImplicit =>
+            let domainFmt ← ppExpr domain
+            pure (some domainFmt.pretty)
+        | _ => pure none
+      withLocalDecl name binderInfo domain fun localExpr => do
+        let rest ← instImplicitBinderTypes (body.instantiate1 localExpr)
+        match domainText? with
+        | some domainText => pure (#[domainText] ++ rest)
+        | none => pure rest
+  | _ => pure #[]
 
 open Lean Elab Command Meta in
 elab "#wiggle_dump_instances" : command => do
@@ -45,6 +65,22 @@ elab "#wiggle_dump_instances" : command => do
         jsonNatField "priority" priority,
         jsonField "attrKind" attrKind
       ]
+
+open Lean Elab Command Meta in
+elab "#wiggle_decl_typeclasses " decl:ident : command => do
+  let name := decl.getId
+  let env ← getEnv
+  let some info := env.find? name
+    | throwError "unknown declaration {name}"
+  let typeFmt ← liftTermElabM <| Meta.ppExpr info.type
+  let instTypes ← liftTermElabM <| instImplicitBinderTypes info.type
+  let instFields := instTypes.toList.map fun instType =>
+    jsonObject [jsonField "typeclass" instType]
+  IO.println <| jsonObject [
+    jsonField "name" (toString name),
+    jsonField "type" typeFmt.pretty,
+    jsonRawField "typeclasses" ("[" ++ String.intercalate "," instFields ++ "]")
+  ]
 
 end Wiggle
 
