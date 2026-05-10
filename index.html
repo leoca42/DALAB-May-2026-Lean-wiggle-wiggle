@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lean Perturbation Viewer</title>
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-code: #2d2d2d;
+            --text-light: #e0e0e0;
+            --border-color: #e1e4e8;
+            --sidebar-bg: #f8f9fa;
+            --panel-bg: #ffffff;
+            --app-bg: #f3f4f6;
+            --primary: #3675bc;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--app-bg);
+        }
+
+        /* Navbar / Header */
+        header {
+            background-color: #24292e;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            z-index: 10;
+        }
+
+        button.toggle-btn {
+            background: none;
+            border: 1px solid #444;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        button.toggle-btn:hover { background: #444; }
+
+        input[type="file"] {
+            font-size: 14px;
+        }
+
+        /* Layout */
+        #workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar (Collapsible Left-Left Panel) */
+        #sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.hidden {
+            width: 0;
+            border-right: none;
+        }
+
+        .source-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eaecef;
+            font-size: 14px;
+            color: #24292e;
+            word-break: break-all;
+        }
+
+        .source-item:hover { background-color: #eaecef; }
+        .source-item.active { 
+            background-color: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+        }
+
+        /* Main Panels */
+        #left-panel, #right-panel {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #left-panel {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            min-width: 300px;
+        }
+
+        #right-panel {
+            flex: 2;
+            background-color: var(--app-bg);
+        }
+
+        h2 { margin-top: 0; font-size: 1.2em; color: #24292e; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;}
+        h3 { margin-top: 0; font-size: 1em; color: #586069; }
+
+        /* Lean Code Blocks */
+        .code-block {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--bg-code);
+            color: var(--text-light);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+
+        .original-block {
+            background-color: #f6f8fa;
+            color: #24292e;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Perturbation Cards */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1em;
+            text-transform: capitalize;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #586069;
+            margin-bottom: 10px;
+        }
+
+        .null-state {
+            font-style: italic;
+            color: #6a737d;
+            padding: 10px;
+            background: #fafbfc;
+            border: 1px dashed #e1e4e8;
+            border-radius: 6px;
+        }
+
+        /* Badges for Truth Values */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.true { background: #dcffe4; color: #1a7f37; border: 1px solid #4ac26b;}
+        .badge.false { background: #ffebe9; color: #cf222e; border: 1px solid #ff8182;}
+        .badge.unknown { background: #eaecef; color: #57606a; border: 1px solid #d0d7de;}
+        
+        .timestamp {
+            font-size: 11px;
+            color: #8c959f;
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        <strong style="margin-right: 20px;">Lean Viewer</strong>
+        <input type="file" id="fileInput" accept=".jsonl">
+        <span id="fileStatus" style="font-size: 13px; color: #aaa;">Loaded Sample Data</span>
+    </header>
+
+    <div id="workspace">
+        <div id="sidebar"></div>
+
+        <div id="left-panel">
+            <h2>Original Statement</h2>
+            <div id="original-content">
+                <p style="color: #6a737d; font-style: italic;">Select a source ID from the left menu.</p>
+            </div>
+        </div>
+
+        <div id="right-panel">
+            <h2>Perturbations</h2>
+            <div id="perturbations-content">
+                <p style="color: #6a737d; font-style: italic;">Perturbations will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data provided in the prompt to allow immediate testing
+        const sampleData = `{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["negate"], "perturbed_statement": "theorem wiggle_demo.extracted_1_1 : ∃ m n, m + n ≠ n + m := sorry", "is_true": false, "perturbation_description": "Negate the full statement (not P). Always False.", "timestamp": "2026-05-10T17:05:00.374300+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["contrapose"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Contrapositive (not Q -> not P). Logically equivalent, True.", "timestamp": "2026-05-10T17:05:09.026683+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["converse"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Converse (Q -> P). Truth unknown.", "timestamp": "2026-05-10T17:05:17.740585+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["generalize"], "perturbed_statement": "theorem wiggle_demo.extracted_1_1 {m n : ℕ} : m + n = n + m := sorry", "is_true": true, "perturbation_description": "Remove unused Prop hypotheses. Statement stays True.", "timestamp": "2026-05-10T17:05:26.571467+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["tc_generalize"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Weaken typeclass in hypothesis (parent class). True.", "timestamp": "2026-05-10T17:05:26.572307+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["tc_weaken_hyp"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Strengthen typeclass in hypothesis (child class). True.", "timestamp": "2026-05-10T17:05:26.572596+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["tc_strengthen_conc"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Strengthen typeclass in conclusion (child class). Unknown.", "timestamp": "2026-05-10T17:05:26.572919+00:00"}
+{"source_id": "nat_add_comm", "original_statement": "m + n = n + m", "original_type_str": "∀ {m n : ℕ}, m + n = n + m", "perturbations_applied": ["tc_weaken_conc"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Weaken typeclass in conclusion (parent class). True.", "timestamp": "2026-05-10T17:05:26.573135+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["negate"], "perturbed_statement": "theorem wiggle_demo.extracted_1_1 : ∃ i j, i.gcd j = 0 ∧ (i = 0 → j ≠ 0) ∨ i.gcd j ≠ 0 ∧ i = 0 ∧ j = 0 := sorry", "is_true": false, "perturbation_description": "Negate the full statement (not P). Always False.", "timestamp": "2026-05-10T17:05:35.381122+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["contrapose"], "perturbed_statement": "theorem wiggle_demo.extracted_1_5 {i j : ℕ} : ¬i.gcd j = 0 ↔ ¬i = 0 ∨ ¬j = 0 := sorry", "is_true": true, "perturbation_description": "Contrapositive (not Q -> not P). Logically equivalent, True.", "timestamp": "2026-05-10T17:05:44.252462+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["converse"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Converse (Q -> P). Truth unknown.", "timestamp": "2026-05-10T17:05:53.460274+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["generalize"], "perturbed_statement": "theorem wiggle_demo.extracted_1_1 {i j : ℕ} : i.gcd j = 0 ↔ i = 0 ∧ j = 0 := sorry", "is_true": true, "perturbation_description": "Remove unused Prop hypotheses. Statement stays True.", "timestamp": "2026-05-10T17:06:02.360120+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["tc_generalize"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Weaken typeclass in hypothesis (parent class). True.", "timestamp": "2026-05-10T17:06:02.361347+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["tc_weaken_hyp"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Strengthen typeclass in hypothesis (child class). True.", "timestamp": "2026-05-10T17:06:02.361669+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["tc_strengthen_conc"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Strengthen typeclass in conclusion (child class). Unknown.", "timestamp": "2026-05-10T17:06:02.363241+00:00"}
+{"source_id": "nat_gcd_iff", "original_statement": "Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "original_type_str": "∀ {i j : ℕ}, Nat.gcd i j = 0 ↔ i = 0 ∧ j = 0", "perturbations_applied": ["tc_weaken_conc"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Weaken typeclass in conclusion (parent class). True.", "timestamp": "2026-05-10T17:06:02.363494+00:00"}
+{"source_id": "add_comm_monoid", "original_statement": "a + b = b + a", "original_type_str": "∀ {α : Type*} [inst : AddCommMonoid α] (a b : α), a + b = b + a", "perturbations_applied": ["negate"], "perturbed_statement": "theorem wiggle_demo.extracted_1_1.{u_1} : ∃ α inst a b, a + b ≠ b + a := sorry", "is_true": false, "perturbation_description": "Negate the full statement (not P). Always False.", "timestamp": "2026-05-10T17:06:11.240418+00:00"}
+{"source_id": "add_comm_monoid", "original_statement": "a + b = b + a", "original_type_str": "∀ {α : Type*} [inst : AddCommMonoid α] (a b : α), a + b = b + a", "perturbations_applied": ["contrapose"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Contrapositive (not Q -> not P). Logically equivalent, True.", "timestamp": "2026-05-10T17:06:20.040705+00:00"}
+{"source_id": "add_comm_monoid", "original_statement": "a + b = b + a", "original_type_str": "∀ {α : Type*} [inst : AddCommMonoid α] (a b : α), a + b = b + a", "perturbations_applied": ["converse"], "perturbed_statement": null, "is_true": "unknown", "perturbation_description": "Converse (Q -> P). Truth unknown.", "timestamp": "2026-05-10T17:06:28.846055+00:00"}`;
+
+        let parsedData = {}; 
+        
+        // Setup initial app state
+        window.onload = () => {
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            processJSONL(sampleData);
+        };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('hidden');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const contents = e.target.result;
+                document.getElementById('fileStatus').innerText = `Loaded: ${file.name}`;
+                processJSONL(contents);
+            };
+            reader.readAsText(file);
+        }
+
+        function processJSONL(text) {
+            parsedData = {};
+            const lines = text.split('\n');
+            
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                try {
+                    const obj = JSON.parse(line);
+                    const id = obj.source_id;
+                    
+                    if (!parsedData[id]) {
+                        parsedData[id] = {
+                            original_statement: obj.original_statement,
+                            original_type_str: obj.original_type_str,
+                            perturbations: []
+                        };
+                    }
+                    parsedData[id].perturbations.push(obj);
+                } catch (e) {
+                    console.error("Error parsing line:", line, e);
+                }
+            });
+
+            renderSidebar();
+        }
+
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.innerHTML = ''; // Clear existing
+            
+            const sourceIds = Object.keys(parsedData);
+            
+            if(sourceIds.length === 0) {
+                sidebar.innerHTML = '<div style="padding:15px; color:#666;">No data found.</div>';
+                return;
+            }
+
+            sourceIds.forEach((id, index) => {
+                const div = document.createElement('div');
+                div.className = 'source-item';
+                div.innerText = id;
+                div.onclick = () => selectSource(id, div);
+                sidebar.appendChild(div);
+
+                // Select the first one by default
+                if(index === 0) {
+                    selectSource(id, div);
+                }
+            });
+        }
+
+        function selectSource(id, element) {
+            // Update Active styling
+            document.querySelectorAll('.source-item').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+
+            const data = parsedData[id];
+            
+            // 1. Render Left Panel
+            document.getElementById('original-content').innerHTML = `
+                <h3><code style="background:#f1f1f1; padding:2px 6px; border-radius:4px;">${id}</code></h3>
+                <div class="code-block original-block"><strong>Statement:</strong>\n${data.original_statement}</div>
+                <div class="code-block original-block"><strong>Type Str:</strong>\n${data.original_type_str}</div>
+            `;
+
+            // 2. Render Right Panel
+            const rightContainer = document.getElementById('perturbations-content');
+            rightContainer.innerHTML = ''; // Clear existing cards
+            
+            data.perturbations.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Format Perturbation Names
+                const pName = p.perturbations_applied.join(" + ");
+                
+                // Format True/False Badge
+                let badgeClass = 'unknown';
+                let badgeText = 'UNKNOWN';
+                if (p.is_true === true) { badgeClass = 'true'; badgeText = 'TRUE'; }
+                if (p.is_true === false) { badgeClass = 'false'; badgeText = 'FALSE'; }
+
+                // Format Code Block (Handle Nulls)
+                let codeHtml = '';
+                if (p.perturbed_statement) {
+                    codeHtml = `<div class="code-block">${p.perturbed_statement}</div>`;
+                } else {
+                    codeHtml = `<div class="null-state">No new statement generated (Null)</div>`;
+                }
+
+                // Format Date
+                const dateStr = new Date(p.timestamp).toLocaleString();
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-title">${pName}</span>
+                        <span class="badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="card-desc">${p.perturbation_description}</div>
+                    ${codeHtml}
+                    <div class="timestamp">${dateStr}</div>
+                `;
+                
+                rightContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
