@@ -64,7 +64,7 @@ After each perturbation, the variant is run through Lean's typechecker to confir
 
 ---
 
-**Goal 2: Evaluation** *(Priority)*
+**Goal 2: Evaluation** *(Next Steps)*
 
 Two complementary axes: semantic similarity (are anchor and variant still about the same thing?) and mathematical diversity (how varied is the full dataset?). Mathematical distinctness is also verified per pair as a hard filter.
 
@@ -95,7 +95,7 @@ Targets: cosine similarity ≥ 0.70 per pair; transformation entropy ≥ 1.5 bit
 
 ---
 
-**Goal 3: Embedder Training** *(Stretch goal)*
+**Goal 3: Embedder Training** *(Next Steps)*
 
 Use the generated (anchor, variant) pairs as a contrastive training signal. Anchors and same-topic variants are positives; negated or over-generalized variants are hard negatives. Fine-tune a base model (e.g. CodeBERT or a small LLaMA variant) with a contrastive loss such as SimCSE or NT-Xent. Evaluate against existing Lean and formal-math embedders on retrieval benchmarks such as theorem retrieval from Mathlib.
 
