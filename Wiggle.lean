@@ -136,28 +136,18 @@ elab "weaken_statement_by_weakening_conclusion " newGoal:term : tactic => do
   withMainContext do
     let newTarget ← Term.elabType newGoal
     replaceMainGoalWithForExtraction newTarget
-  )
-)
 
-/--
-  `mutate_goal_type`:
-  Takes the current goal `⊢ T` and replaces it with `⊢ ∀ (h_extra : True), T`.
-  This is a real mutation of the goal *type*.
--/
-open Lean Meta Elab Tactic
+
+-- `mutate_goal_type`: replaces `⊢ T` with `⊢ ∀ (h_extra : True), T`.
+open Lean Meta Elab Tactic in
 elab "mutate_goal_type" : tactic => do
   let g ← getMainGoal
   let decl ← g.getDecl
   let oldTy := decl.type
-
   -- Build: ∀ (h_extra : True), oldTy
-  let newTy :=
-    mkForall `h_extra BinderInfo.default (mkConst ``True) oldTy
-
+  let newTy := mkForall `h_extra BinderInfo.default (mkConst ``True) oldTy
   -- Create a new metavariable with the mutated type
   let newGoal ← mkFreshExprMVar newTy
-
-  -- Replace the main goal with the mutated one
   replaceMainGoal [newGoal.mvarId!]
 
 

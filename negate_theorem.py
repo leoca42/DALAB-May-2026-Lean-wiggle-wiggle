@@ -8,8 +8,8 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # Absolute path to thi
 LEAN_CODE = """\
 import Wiggle
 
--- Real.hasDerivAt_exp negated
-lemma to_negate (x : ℝ) : HasDerivAt Real.exp (Real.exp x) x := by
+-- Nat.gcd_eq_zero_iffp: negated
+lemma to_negate {i j : Nat} : gcd i j = 0 ↔ i = 0 ∧ j = 0 := by
   negate_state
   extract_goal
   sorry
