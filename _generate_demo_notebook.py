@@ -26,6 +26,7 @@ theorems, then save every result (single and chained) as a structured JSONL data
 |---|---|
 | **Lean tactics** | `negate`, `contrapose`, `converse`, `drop_unused_hyp` — run via `lake env lean` |
 | **Typeclass mutations** | `tc_generalize`, `tc_weaken_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` — Python text substitution verified by Lean |
+| **Bound perturbations** | `flip_bound`, `bound_tighter` — regex-based inequality/constant manipulation |
 
 Each output record tracks: original statement · perturbations applied (in order) ·
 perturbed statement · `is_true` flag.
@@ -56,11 +57,12 @@ CELL_DATASET_MD = """\
 
 Theorems are chosen to showcase every perturbation type:
 
-* **Equalities** (`nat_add_comm`, `comm_ring_mul_comm`, `ring_zero_add`) — good for `negate`
-* **iff / implications** (`nat_gcd_iff`, `nat_lt_cancel`, `field_mul_inv_cancel`) — `contrapose` / `converse`
-* **Typeclass hypotheses** (`add_comm_monoid`, `comm_ring_mul_comm`, `ring_zero_add`, `linear_order_le_or_ge`) — `tc_*`
+* **Equalities** (`comm_ring_mul_comm`) — good for `negate`
+* **iff / implications** (`nat_gcd_iff`, `nat_lt_cancel_left`, `field_mul_inv_cancel`) — `contrapose` / `converse`
+* **Typeclass hypotheses** (`add_comm_monoid`, `comm_ring_mul_comm`, `linear_order_le_or_ge`) — `tc_*`
 * **Typeclass conclusion** (`polynomial_is_domain`) — `tc_strengthen_conc` / `tc_weaken_conc`
-* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `drop_unused_hyp`"""
+* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `drop_unused_hyp`
+* **Numeric bound** (`nat_pos_of_ne_zero`, `nat_ge_one_of_pos`) — `flip_bound` / `bound_tighter`"""
 
 CELL_THEOREMS = r"""# ── 10 curated Lean 4 theorems ───────────────────────────────────────────────
 # Fields:
@@ -73,12 +75,12 @@ CELL_THEOREMS = r"""# ── 10 curated Lean 4 theorems ────────
 
 TOY_THEOREMS = [
     {
-        "id": "nat_add_comm",
-        "binders": "{m n : ℕ}",
-        "body": "m + n = n + m",
-        "type_str": "∀ {m n : ℕ}, m + n = n + m",
-        "description": "Natural-number addition is commutative.",
-        "notes": "Equality. negate always gives False; no typeclass to mutate.",
+        "id": "nat_pos_of_ne_zero",
+        "binders": "(n : ℕ)",
+        "body": "n ≠ 0 → n > 0",
+        "type_str": "∀ (n : ℕ), n ≠ 0 → n > 0",
+        "description": "A nonzero natural number is positive.",
+        "notes": "Has > 0: flip_bound gives n < 0 (False for ℕ); bound_tighter gives n > 1 (False for n=1).",
     },
     {
         "id": "nat_gcd_iff",
@@ -137,12 +139,12 @@ TOY_THEOREMS = [
         "notes": "Hierarchy: Ring <- CommRing. Statement holds even in CommSemiring.",
     },
     {
-        "id": "ring_zero_add",
-        "binders": "{α : Type*} [inst : Ring α] (a : α)",
-        "body": "0 + a = a",
-        "type_str": "∀ {α : Type*} [inst : Ring α] (a : α), 0 + a = a",
-        "description": "Zero is a left identity for addition in any ring.",
-        "notes": "Ring can be generalised to AddMonoid for this conclusion.",
+        "id": "nat_ge_one_of_pos",
+        "binders": "(n : ℕ)",
+        "body": "n > 0 → n ≥ 1",
+        "type_str": "∀ (n : ℕ), n > 0 → n ≥ 1",
+        "description": "A positive natural number is at least 1.",
+        "notes": "Has ≥ 1 and > 0: flip_bound on ≥ gives ≤ 1 (False for n=2); bound_tighter on ≥ 1 gives ≥ 2 (False for n=1).",
     },
     {
         "id": "linear_order_le_or_ge",
@@ -249,7 +251,9 @@ Every perturbation function accepts a `theorem` dict and returns:
 | `tc_generalize` | `True` | Weaker hypothesis — same conclusion still holds |
 | `tc_weaken_hyp` | `True` | Stronger hypothesis — conclusion trivially holds |
 | `tc_strengthen_conc` | `"unknown"` | Claiming more — may fail |
-| `tc_weaken_conc` | `True` | Claiming less — follows from original |"""
+| `tc_weaken_conc` | `True` | Claiming less — follows from original |
+| `flip_bound` | `"unknown"` | Flipping `<`/`>` or `≤`/`≥` changes meaning; may or may not hold |
+| `bound_tighter` | `"unknown"` | Tightening the numeric bound; may falsify or preserve truth |"""
 
 CELL_TACTIC_PERTURBS = r"""# ── Lean-tactic perturbations ─────────────────────────────────────────────────
 # Each function calls a Wiggle tactic through lake env lean.
@@ -340,6 +344,34 @@ def perturb_tc_weaken_conc(theorem: dict) -> dict:
 
 print("Typeclass perturbation functions defined.")"""
 
+CELL_BOUNDS_PERTURBS = r"""# ── Bound perturbations ────────────────────────────────────────────────────────
+# These use bounds.py: pure regex substitution on the type_str, no Lean calls.
+# flip_bound   – reverses the first inequality found (< ↔ >, ≤ ↔ ≥)
+# bound_tighter – shifts the first numeric literal by ±1 in the tighter direction
+#                 (≥n → ≥n+1, ≤n → ≤n-1, >n → >n+1, <n → <n-1)
+#
+# is_true = "unknown" for both: flip_bound on `a ≤ b ∨ b ≤ a` gives a *True*
+# result (≥ is equivalent here), so we cannot blanket-label these False.
+
+from bounds import flip_bound, perturb_bound
+
+
+def perturb_flip_bound(theorem: dict) -> dict:
+    # Flip the direction of the first inequality in type_str.
+    result = flip_bound(theorem["id"], theorem["type_str"])
+    stmt = result[1] if result else None
+    return {"perturbed_statement": stmt, "is_true": "unknown"}
+
+
+def perturb_bound_tighter(theorem: dict) -> dict:
+    # Tighten the first numeric bound by ±1.
+    result = perturb_bound(theorem["id"], theorem["type_str"])
+    stmt = result[1] if result else None
+    return {"perturbed_statement": stmt, "is_true": "unknown"}
+
+
+print("Bound perturbation functions defined.")"""
+
 CELL_REGISTRY_MD = """\
 ## 4 · Perturbation Registry
 
@@ -395,9 +427,20 @@ PERTURBATION_REGISTRY = [
         "fn": perturb_tc_weaken_conc,
         "description": "Weaken typeclass in conclusion (parent class). True.",
     },
+    # ── Bound perturbations ────────────────────────────────────────────────────
+    {
+        "name": "flip_bound",
+        "fn": perturb_flip_bound,
+        "description": "Flip inequality direction (< <-> >, <= <-> >=). Truth unknown.",
+    },
+    {
+        "name": "bound_tighter",
+        "fn": perturb_bound_tighter,
+        "description": "Tighten numeric bound by +-1 (>=n->>=n+1, <=n-><=n-1). Truth unknown.",
+    },
 ]
 
-print(f"Registry: {len(PERTURBATION_REGISTRY)} perturbation types\n")
+print(f"Registry: {len(PERTURBATION_REGISTRY)} perturbation types (8 original + 2 bounds)\n")
 print(f"  {'Name':<25}  Description")
 print(f"  {'-'*25}  {'-'*50}")
 for p in PERTURBATION_REGISTRY:
@@ -471,11 +514,15 @@ input to step *i+1*. If a step returns `None` the chain is marked `chain_broken`
 | `tc_generalize -> negate` | Generalise then negate — always False |
 | `contrapose -> converse` | Gives the *inverse* (not P -> not Q) |
 | `converse -> negate` | Negate the converse |
+| `flip_bound -> negate` | Flip inequality then negate — False by dominance rule |
+| `bound_tighter -> negate` | Tighten bound then negate — False by dominance rule |
 
 > **Note on `is_true` in chains:** The `_compose_truth` dominance rule means
-> `negate -> negate` reports `is_true=False` even though double negation recovers
-> a true statement. Semantic truth verification for chains requires a theorem prover
-> and is left as a future enhancement."""
+> `False` dominates `unknown` dominates `True`. This can be imprecise: `negate -> negate`
+> reports `is_true=False` even though double negation recovers a true statement, and
+> `flip_bound -> negate` reports `False` even when `flip_bound` alone is `unknown`.
+> Semantic truth verification for chains requires a theorem prover and is left as a
+> future enhancement."""
 
 CELL_CHAIN_RUN = r"""# ── Parse an extracted Lean theorem string ────────────────────────────────────
 # extract_goal emits lines like:
@@ -591,6 +638,9 @@ CHAINS = [
     ["tc_generalize", "negate"],
     ["contrapose", "converse"],
     ["converse", "negate"],
+    # Bounds chains
+    ["flip_bound", "negate"],
+    ["bound_tighter", "negate"],
 ]
 
 print(f"Running {len(CHAINS)} chains x {len(TOY_THEOREMS)} theorems...\n")
@@ -686,6 +736,7 @@ cells = [
     md(CELL_PERTURB_MD),
     cod(CELL_TACTIC_PERTURBS),
     cod(CELL_TC_PERTURBS),
+    cod(CELL_BOUNDS_PERTURBS),
     md(CELL_REGISTRY_MD),
     cod(CELL_REGISTRY),
     md(CELL_SINGLE_MD),
