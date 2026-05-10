@@ -38,9 +38,8 @@ Examples of Lean Theorem Search
 
 # Bottlenecks, Downsides, and Next Steps
 
-1. Running our code on a laptop, it takes about 5-30s per perturbation, primarily because using the Lean tactic itself is slow. This seems to be slower than frontier LLMs.
-
-2. We don't see any easy way to speed this up on GPUs.
+Running our code on a laptop, it takes about 5-30s per perturbation, primarily because using the Lean tactic itself is slow. This seems to be slower than asking frontier LLMs to perturb Lean statements.
+- However, our statements seem to be more accurate or be of a deeper perturbation than the LLM version. For example, our negations fully embed the negation into the statement using a Lean tactic, instead of jsut inserting a negation sign onto the statement.
 
 Next Steps:
 - How can we make this faster?
