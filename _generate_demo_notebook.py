@@ -227,6 +227,38 @@ def make_lemma(theorem: dict, tactic_body: str) -> str:
     )
 
 
+def normalize_statement(stmt: str | None) -> str | None:
+    # Tactic perturbations emit extract_goal output of the form:
+    #   theorem wiggle_demo.extracted_1_1 {binders} : <type> := sorry
+    # Typeclass and bounds perturbations already emit a clean type string.
+    # This function strips the wrapper so every perturbed_statement is a bare type.
+    if stmt is None or not re.match(r"^theorem\s+\S*extracted", stmt):
+        return stmt
+    # Strip ":= sorry/by ..." suffix
+    m = re.match(r"^theorem\s+\S+\s*(.*?)\s*:=\s*(?:sorry|by)\b", stmt, re.DOTALL)
+    if not m:
+        return stmt
+    sig_part = m.group(1).strip()
+    # Find first top-level ":" that is not "::" (namespace separator)
+    depth = 0
+    i = 0
+    while i < len(sig_part):
+        c = sig_part[i]
+        if c in "({[":
+            depth += 1
+        elif c in ")}]":
+            depth = max(0, depth - 1)
+        elif c == ":" and depth == 0:
+            if i + 1 < len(sig_part) and sig_part[i + 1] == ":":
+                i += 2
+                continue
+            binders = sig_part[:i].strip()
+            body    = re.sub(r"\s+", " ", sig_part[i + 1:].strip())
+            return (f"∀ {binders}, {body}" if binders else body)
+        i += 1
+    return re.sub(r"\s+", " ", sig_part)
+
+
 # Confirm lake is available
 _check = subprocess.run(["lake", "--version"], capture_output=True, text=True)
 print("lake:", _check.stdout.strip() or _check.stderr.strip())"""
@@ -472,7 +504,7 @@ def apply_perturbation(theorem: dict, perturbation_name: str) -> dict:
         "original_statement":        theorem["body"],
         "original_type_str":         theorem["type_str"],
         "perturbations_applied":     [perturbation_name],
-        "perturbed_statement":       result["perturbed_statement"],
+        "perturbed_statement":       normalize_statement(result["perturbed_statement"]),
         "is_true":                   result["is_true"],
         "perturbation_description":  entry["description"],
         "timestamp":                 datetime.now(timezone.utc).isoformat(),
@@ -517,12 +549,10 @@ input to step *i+1*. If a step returns `None` the chain is marked `chain_broken`
 | `flip_bound -> negate` | Flip inequality then negate — False by dominance rule |
 | `bound_tighter -> negate` | Tighten bound then negate — False by dominance rule |
 
-> **Note on `is_true` in chains:** The `_compose_truth` dominance rule means
-> `False` dominates `unknown` dominates `True`. This can be imprecise: `negate -> negate`
-> reports `is_true=False` even though double negation recovers a true statement, and
-> `flip_bound -> negate` reports `False` even when `flip_bound` alone is `unknown`.
-> Semantic truth verification for chains requires a theorem prover and is left as a
-> future enhancement."""
+> **`is_true` composition rule:** `False + False = unknown` (two false-labelled steps
+> may cancel, e.g. `negate -> negate` recovers something close to the original).
+> Otherwise `False` dominates `unknown` dominates `True`. Semantic truth verification
+> for chains requires a theorem prover and is left as a future enhancement."""
 
 CELL_CHAIN_RUN = r"""# ── Parse an extracted Lean theorem string ────────────────────────────────────
 # extract_goal emits lines like:
@@ -572,7 +602,11 @@ def parse_extracted_lean(extracted: str) -> dict | None:
 # ── Apply a chain of perturbations ────────────────────────────────────────────
 
 def _compose_truth(so_far: bool | str, new_val: bool | str) -> bool | str:
-    # False dominates everything; then "unknown" dominates True.
+    # False + False = unknown: two consecutive false-labelled steps may cancel
+    # (e.g. negate -> negate recovers a statement close to the original).
+    # Otherwise False dominates, then unknown dominates True.
+    if so_far is False and new_val is False:
+        return "unknown"
     if so_far is False or new_val is False:
         return False
     if so_far == "unknown" or new_val == "unknown":
@@ -614,7 +648,8 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
         if parsed:
             current = {**theorem, **parsed}         # inherit id/description, override statement
         else:
-            current = {**theorem, "body": stmt, "type_str": stmt, "binders": ""}
+            clean = normalize_statement(stmt)
+            current = {**theorem, "body": clean, "type_str": clean, "binders": ""}
 
         is_true_acc = _compose_truth(is_true_acc, result["is_true"])
 
@@ -623,7 +658,7 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
         "original_statement":        theorem["body"],
         "original_type_str":         theorem["type_str"],
         "perturbations_applied":     perturbation_names,
-        "perturbed_statement":       current["body"],
+        "perturbed_statement":       normalize_statement(current["body"]),
         "is_true":                   is_true_acc,
         "perturbation_description":  " -> ".join(perturbation_names),
         "timestamp":                 datetime.now(timezone.utc).isoformat(),
