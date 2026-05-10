@@ -24,8 +24,9 @@ theorems, then save every result (single and chained) as a structured JSONL data
 
 | Layer | What it does |
 |---|---|
-| **Lean tactics** | `negate`, `contrapose`, `converse`, `generalize` — run via `lake env lean` |
+| **Lean tactics** | `negate`, `contrapose`, `converse`, `drop_unused_hyp` — run via `lake env lean` |
 | **Typeclass mutations** | `tc_generalize`, `tc_weaken_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` — Python text substitution verified by Lean |
+| **Bound perturbations** | `flip_bound`, `bound_tighter` — regex-based inequality/constant manipulation |
 
 Each output record tracks: original statement · perturbations applied (in order) ·
 perturbed statement · `is_true` flag.
@@ -56,11 +57,12 @@ CELL_DATASET_MD = """\
 
 Theorems are chosen to showcase every perturbation type:
 
-* **Equalities** (`nat_add_comm`, `comm_ring_mul_comm`, `ring_zero_add`) — good for `negate`
-* **iff / implications** (`nat_gcd_iff`, `nat_lt_cancel`, `field_mul_inv_cancel`) — `contrapose` / `converse`
-* **Typeclass hypotheses** (`add_comm_monoid`, `comm_ring_mul_comm`, `ring_zero_add`, `linear_order_le_or_ge`) — `tc_*`
+* **Equalities** (`comm_ring_mul_comm`) — good for `negate`
+* **iff / implications** (`nat_gcd_iff`, `nat_lt_cancel_left`, `field_mul_inv_cancel`) — `contrapose` / `converse`
+* **Typeclass hypotheses** (`add_comm_monoid`, `comm_ring_mul_comm`, `linear_order_le_or_ge`) — `tc_*`
 * **Typeclass conclusion** (`polynomial_is_domain`) — `tc_strengthen_conc` / `tc_weaken_conc`
-* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `generalize`"""
+* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `drop_unused_hyp`
+* **Numeric bound** (`nat_pos_of_ne_zero`, `nat_ge_one_of_pos`) — `flip_bound` / `bound_tighter`"""
 
 CELL_THEOREMS = r"""# ── 10 curated Lean 4 theorems ───────────────────────────────────────────────
 # Fields:
@@ -73,12 +75,12 @@ CELL_THEOREMS = r"""# ── 10 curated Lean 4 theorems ────────
 
 TOY_THEOREMS = [
     {
-        "id": "nat_add_comm",
-        "binders": "{m n : ℕ}",
-        "body": "m + n = n + m",
-        "type_str": "∀ {m n : ℕ}, m + n = n + m",
-        "description": "Natural-number addition is commutative.",
-        "notes": "Equality. negate always gives False; no typeclass to mutate.",
+        "id": "nat_pos_of_ne_zero",
+        "binders": "(n : ℕ)",
+        "body": "n ≠ 0 → n > 0",
+        "type_str": "∀ (n : ℕ), n ≠ 0 → n > 0",
+        "description": "A nonzero natural number is positive.",
+        "notes": "Has > 0: flip_bound gives n < 0 (False for ℕ); bound_tighter gives n > 1 (False for n=1).",
     },
     {
         "id": "nat_gcd_iff",
@@ -126,7 +128,7 @@ TOY_THEOREMS = [
         "body": "HasDerivAt Real.exp (Real.exp x) x",
         "type_str": "∀ (x : ℝ) (h_unused : True), HasDerivAt Real.exp (Real.exp x) x",
         "description": "Derivative of exp at x is exp(x). Has a dummy True hypothesis.",
-        "notes": "generalize (clear_unused_props) removes h_unused. Canonical test case.",
+        "notes": "drop_unused_hyp (clear_unused_props) removes h_unused. Canonical test case.",
     },
     {
         "id": "comm_ring_mul_comm",
@@ -137,12 +139,12 @@ TOY_THEOREMS = [
         "notes": "Hierarchy: Ring <- CommRing. Statement holds even in CommSemiring.",
     },
     {
-        "id": "ring_zero_add",
-        "binders": "{α : Type*} [inst : Ring α] (a : α)",
-        "body": "0 + a = a",
-        "type_str": "∀ {α : Type*} [inst : Ring α] (a : α), 0 + a = a",
-        "description": "Zero is a left identity for addition in any ring.",
-        "notes": "Ring can be generalised to AddMonoid for this conclusion.",
+        "id": "nat_ge_one_of_pos",
+        "binders": "(n : ℕ)",
+        "body": "n > 0 → n ≥ 1",
+        "type_str": "∀ (n : ℕ), n > 0 → n ≥ 1",
+        "description": "A positive natural number is at least 1.",
+        "notes": "Has ≥ 1 and > 0: flip_bound on ≥ gives ≤ 1 (False for n=2); bound_tighter on ≥ 1 gives ≥ 2 (False for n=1).",
     },
     {
         "id": "linear_order_le_or_ge",
@@ -225,6 +227,38 @@ def make_lemma(theorem: dict, tactic_body: str) -> str:
     )
 
 
+def normalize_statement(stmt: str | None) -> str | None:
+    # Tactic perturbations emit extract_goal output of the form:
+    #   theorem wiggle_demo.extracted_1_1 {binders} : <type> := sorry
+    # Typeclass and bounds perturbations already emit a clean type string.
+    # This function strips the wrapper so every perturbed_statement is a bare type.
+    if stmt is None or not re.match(r"^theorem\s+\S*extracted", stmt):
+        return stmt
+    # Strip ":= sorry/by ..." suffix
+    m = re.match(r"^theorem\s+\S+\s*(.*?)\s*:=\s*(?:sorry|by)\b", stmt, re.DOTALL)
+    if not m:
+        return stmt
+    sig_part = m.group(1).strip()
+    # Find first top-level ":" that is not "::" (namespace separator)
+    depth = 0
+    i = 0
+    while i < len(sig_part):
+        c = sig_part[i]
+        if c in "({[":
+            depth += 1
+        elif c in ")}]":
+            depth = max(0, depth - 1)
+        elif c == ":" and depth == 0:
+            if i + 1 < len(sig_part) and sig_part[i + 1] == ":":
+                i += 2
+                continue
+            binders = sig_part[:i].strip()
+            body    = re.sub(r"\s+", " ", sig_part[i + 1:].strip())
+            return (f"∀ {binders}, {body}" if binders else body)
+        i += 1
+    return re.sub(r"\s+", " ", sig_part)
+
+
 # Confirm lake is available
 _check = subprocess.run(["lake", "--version"], capture_output=True, text=True)
 print("lake:", _check.stdout.strip() or _check.stderr.strip())"""
@@ -245,11 +279,13 @@ Every perturbation function accepts a `theorem` dict and returns:
 | `negate` | `False` | Negation of a true theorem |
 | `contrapose` | `True` | Logically equivalent to original |
 | `converse` | `"unknown"` | May or may not hold |
-| `generalize` | `True` | Removing unused hyps keeps provability |
+| `drop_unused_hyp` | `True` | Removing unused hyps keeps provability |
 | `tc_generalize` | `True` | Weaker hypothesis — same conclusion still holds |
 | `tc_weaken_hyp` | `True` | Stronger hypothesis — conclusion trivially holds |
 | `tc_strengthen_conc` | `"unknown"` | Claiming more — may fail |
-| `tc_weaken_conc` | `True` | Claiming less — follows from original |"""
+| `tc_weaken_conc` | `True` | Claiming less — follows from original |
+| `flip_bound` | `"unknown"` | Flipping `<`/`>` or `≤`/`≥` changes meaning; may or may not hold |
+| `bound_tighter` | `"unknown"` | Tightening the numeric bound; may falsify or preserve truth |"""
 
 CELL_TACTIC_PERTURBS = r"""# ── Lean-tactic perturbations ─────────────────────────────────────────────────
 # Each function calls a Wiggle tactic through lake env lean.
@@ -279,10 +315,10 @@ def perturb_converse(theorem: dict) -> dict:
     return {"perturbed_statement": stmt, "is_true": "unknown"}
 
 
-def perturb_generalize(theorem: dict) -> dict:
+def perturb_drop_unused_hyp(theorem: dict) -> dict:
     # Remove all unused Prop-valued hypotheses (clear_unused_props tactic).
     # Classic case: theorem with a dummy h : True. Result is still True.
-    lean = make_lemma(theorem, "generalize_statement_by_weakening_hypotheses")
+    lean = make_lemma(theorem, "drop_unused_hyp")
     output = run_lean(lean)
     stmt = extract_theorem(output)
     return {"perturbed_statement": stmt, "is_true": True if stmt else "unknown"}
@@ -340,6 +376,34 @@ def perturb_tc_weaken_conc(theorem: dict) -> dict:
 
 print("Typeclass perturbation functions defined.")"""
 
+CELL_BOUNDS_PERTURBS = r"""# ── Bound perturbations ────────────────────────────────────────────────────────
+# These use bounds.py: pure regex substitution on the type_str, no Lean calls.
+# flip_bound   – reverses the first inequality found (< ↔ >, ≤ ↔ ≥)
+# bound_tighter – shifts the first numeric literal by ±1 in the tighter direction
+#                 (≥n → ≥n+1, ≤n → ≤n-1, >n → >n+1, <n → <n-1)
+#
+# is_true = "unknown" for both: flip_bound on `a ≤ b ∨ b ≤ a` gives a *True*
+# result (≥ is equivalent here), so we cannot blanket-label these False.
+
+from bounds import flip_bound, perturb_bound
+
+
+def perturb_flip_bound(theorem: dict) -> dict:
+    # Flip the direction of the first inequality in type_str.
+    result = flip_bound(theorem["id"], theorem["type_str"])
+    stmt = result[1] if result else None
+    return {"perturbed_statement": stmt, "is_true": "unknown"}
+
+
+def perturb_bound_tighter(theorem: dict) -> dict:
+    # Tighten the first numeric bound by ±1.
+    result = perturb_bound(theorem["id"], theorem["type_str"])
+    stmt = result[1] if result else None
+    return {"perturbed_statement": stmt, "is_true": "unknown"}
+
+
+print("Bound perturbation functions defined.")"""
+
 CELL_REGISTRY_MD = """\
 ## 4 · Perturbation Registry
 
@@ -370,8 +434,8 @@ PERTURBATION_REGISTRY = [
         "description": "Converse (Q -> P). Truth unknown.",
     },
     {
-        "name": "generalize",
-        "fn": perturb_generalize,
+        "name": "drop_unused_hyp",
+        "fn": perturb_drop_unused_hyp,
         "description": "Remove unused Prop hypotheses. Statement stays True.",
     },
     # ── Typeclass-level perturbations ──────────────────────────────────────────
@@ -395,9 +459,20 @@ PERTURBATION_REGISTRY = [
         "fn": perturb_tc_weaken_conc,
         "description": "Weaken typeclass in conclusion (parent class). True.",
     },
+    # ── Bound perturbations ────────────────────────────────────────────────────
+    {
+        "name": "flip_bound",
+        "fn": perturb_flip_bound,
+        "description": "Flip inequality direction (< <-> >, <= <-> >=). Truth unknown.",
+    },
+    {
+        "name": "bound_tighter",
+        "fn": perturb_bound_tighter,
+        "description": "Tighten numeric bound by +-1 (>=n->>=n+1, <=n-><=n-1). Truth unknown.",
+    },
 ]
 
-print(f"Registry: {len(PERTURBATION_REGISTRY)} perturbation types\n")
+print(f"Registry: {len(PERTURBATION_REGISTRY)} perturbation types (8 original + 2 bounds)\n")
 print(f"  {'Name':<25}  Description")
 print(f"  {'-'*25}  {'-'*50}")
 for p in PERTURBATION_REGISTRY:
@@ -429,7 +504,7 @@ def apply_perturbation(theorem: dict, perturbation_name: str) -> dict:
         "original_statement":        theorem["body"],
         "original_type_str":         theorem["type_str"],
         "perturbations_applied":     [perturbation_name],
-        "perturbed_statement":       result["perturbed_statement"],
+        "perturbed_statement":       normalize_statement(result["perturbed_statement"]),
         "is_true":                   result["is_true"],
         "perturbation_description":  entry["description"],
         "timestamp":                 datetime.now(timezone.utc).isoformat(),
@@ -466,16 +541,18 @@ input to step *i+1*. If a step returns `None` the chain is marked `chain_broken`
 | Chain | Expected behaviour |
 |---|---|
 | `negate -> negate` | Double negation — recovers something close to original |
-| `generalize -> negate` | Negate a more general form |
+| `drop_unused_hyp -> negate` | Negate a more general form |
 | `tc_generalize -> tc_generalize` | Two steps up the typeclass hierarchy |
 | `tc_generalize -> negate` | Generalise then negate — always False |
 | `contrapose -> converse` | Gives the *inverse* (not P -> not Q) |
 | `converse -> negate` | Negate the converse |
+| `flip_bound -> negate` | Flip inequality then negate — False by dominance rule |
+| `bound_tighter -> negate` | Tighten bound then negate — False by dominance rule |
 
-> **Note on `is_true` in chains:** The `_compose_truth` dominance rule means
-> `negate -> negate` reports `is_true=False` even though double negation recovers
-> a true statement. Semantic truth verification for chains requires a theorem prover
-> and is left as a future enhancement."""
+> **`is_true` composition rule:** `False + False = unknown` (two false-labelled steps
+> may cancel, e.g. `negate -> negate` recovers something close to the original).
+> Otherwise `False` dominates `unknown` dominates `True`. Semantic truth verification
+> for chains requires a theorem prover and is left as a future enhancement."""
 
 CELL_CHAIN_RUN = r"""# ── Parse an extracted Lean theorem string ────────────────────────────────────
 # extract_goal emits lines like:
@@ -525,7 +602,11 @@ def parse_extracted_lean(extracted: str) -> dict | None:
 # ── Apply a chain of perturbations ────────────────────────────────────────────
 
 def _compose_truth(so_far: bool | str, new_val: bool | str) -> bool | str:
-    # False dominates everything; then "unknown" dominates True.
+    # False + False = unknown: two consecutive false-labelled steps may cancel
+    # (e.g. negate -> negate recovers a statement close to the original).
+    # Otherwise False dominates, then unknown dominates True.
+    if so_far is False and new_val is False:
+        return "unknown"
     if so_far is False or new_val is False:
         return False
     if so_far == "unknown" or new_val == "unknown":
@@ -567,7 +648,8 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
         if parsed:
             current = {**theorem, **parsed}         # inherit id/description, override statement
         else:
-            current = {**theorem, "body": stmt, "type_str": stmt, "binders": ""}
+            clean = normalize_statement(stmt)
+            current = {**theorem, "body": clean, "type_str": clean, "binders": ""}
 
         is_true_acc = _compose_truth(is_true_acc, result["is_true"])
 
@@ -576,7 +658,7 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
         "original_statement":        theorem["body"],
         "original_type_str":         theorem["type_str"],
         "perturbations_applied":     perturbation_names,
-        "perturbed_statement":       current["body"],
+        "perturbed_statement":       normalize_statement(current["body"]),
         "is_true":                   is_true_acc,
         "perturbation_description":  " -> ".join(perturbation_names),
         "timestamp":                 datetime.now(timezone.utc).isoformat(),
@@ -586,11 +668,14 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
 # ── Chains to run ──────────────────────────────────────────────────────────────
 CHAINS = [
     ["negate", "negate"],
-    ["generalize", "negate"],
+    ["drop_unused_hyp", "negate"],
     ["tc_generalize", "tc_generalize"],
     ["tc_generalize", "negate"],
     ["contrapose", "converse"],
     ["converse", "negate"],
+    # Bounds chains
+    ["flip_bound", "negate"],
+    ["bound_tighter", "negate"],
 ]
 
 print(f"Running {len(CHAINS)} chains x {len(TOY_THEOREMS)} theorems...\n")
@@ -686,6 +771,7 @@ cells = [
     md(CELL_PERTURB_MD),
     cod(CELL_TACTIC_PERTURBS),
     cod(CELL_TC_PERTURBS),
+    cod(CELL_BOUNDS_PERTURBS),
     md(CELL_REGISTRY_MD),
     cod(CELL_REGISTRY),
     md(CELL_SINGLE_MD),

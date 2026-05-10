@@ -124,18 +124,11 @@ elab "clear_unused_props" : tactic => do
   replaceMainGoal [goal]
 
 open Lean.Elab.Tactic in
-macro "generalize_statement_by_weakening_hypotheses" : tactic => `(tactic|
+macro "drop_unused_hyp" : tactic => `(tactic|
   (
     guard_goal_nums 1
     clear_unused_props
     guard_goal_nums 1
-  )
-)
-
-open Lean.Elab.Tactic in
-macro "generalize_state" : tactic => `(tactic|
-  (
-    generalize_statement_by_weakening_hypotheses
   )
 )
 

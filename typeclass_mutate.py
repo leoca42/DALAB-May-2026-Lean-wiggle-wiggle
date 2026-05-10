@@ -456,7 +456,8 @@ def _compile_lean(type_str: str) -> bool:
     """Return True iff `example : <type_str> := by sorry` compiles in Lean."""
     code = f"import Mathlib\n\nexample : {type_str} := by sorry\n"
     output = _run_lean(code)
-    return "error:" not in output and "timeout" not in output
+    # Lean 4 errors appear as both "error:" and "error(<kind>):" — match either.
+    return not re.search(r"\berror[:(]", output) and "timeout" not in output
 
 
 def _find_prop_tc_in_text(text: str) -> list[tuple[str, int, int]]:
