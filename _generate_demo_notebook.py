@@ -24,7 +24,7 @@ theorems, then save every result (single and chained) as a structured JSONL data
 
 | Layer | What it does |
 |---|---|
-| **Lean tactics** | `negate`, `contrapose`, `converse`, `generalize` — run via `lake env lean` |
+| **Lean tactics** | `negate`, `contrapose`, `converse`, `drop_unused_hyp` — run via `lake env lean` |
 | **Typeclass mutations** | `tc_generalize`, `tc_weaken_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` — Python text substitution verified by Lean |
 
 Each output record tracks: original statement · perturbations applied (in order) ·
@@ -60,7 +60,7 @@ Theorems are chosen to showcase every perturbation type:
 * **iff / implications** (`nat_gcd_iff`, `nat_lt_cancel`, `field_mul_inv_cancel`) — `contrapose` / `converse`
 * **Typeclass hypotheses** (`add_comm_monoid`, `comm_ring_mul_comm`, `ring_zero_add`, `linear_order_le_or_ge`) — `tc_*`
 * **Typeclass conclusion** (`polynomial_is_domain`) — `tc_strengthen_conc` / `tc_weaken_conc`
-* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `generalize`"""
+* **Unused hypothesis** (`exp_deriv_unused_hyp`) — `drop_unused_hyp`"""
 
 CELL_THEOREMS = r"""# ── 10 curated Lean 4 theorems ───────────────────────────────────────────────
 # Fields:
@@ -126,7 +126,7 @@ TOY_THEOREMS = [
         "body": "HasDerivAt Real.exp (Real.exp x) x",
         "type_str": "∀ (x : ℝ) (h_unused : True), HasDerivAt Real.exp (Real.exp x) x",
         "description": "Derivative of exp at x is exp(x). Has a dummy True hypothesis.",
-        "notes": "generalize (clear_unused_props) removes h_unused. Canonical test case.",
+        "notes": "drop_unused_hyp (clear_unused_props) removes h_unused. Canonical test case.",
     },
     {
         "id": "comm_ring_mul_comm",
@@ -245,7 +245,7 @@ Every perturbation function accepts a `theorem` dict and returns:
 | `negate` | `False` | Negation of a true theorem |
 | `contrapose` | `True` | Logically equivalent to original |
 | `converse` | `"unknown"` | May or may not hold |
-| `generalize` | `True` | Removing unused hyps keeps provability |
+| `drop_unused_hyp` | `True` | Removing unused hyps keeps provability |
 | `tc_generalize` | `True` | Weaker hypothesis — same conclusion still holds |
 | `tc_weaken_hyp` | `True` | Stronger hypothesis — conclusion trivially holds |
 | `tc_strengthen_conc` | `"unknown"` | Claiming more — may fail |
@@ -279,10 +279,10 @@ def perturb_converse(theorem: dict) -> dict:
     return {"perturbed_statement": stmt, "is_true": "unknown"}
 
 
-def perturb_generalize(theorem: dict) -> dict:
+def perturb_drop_unused_hyp(theorem: dict) -> dict:
     # Remove all unused Prop-valued hypotheses (clear_unused_props tactic).
     # Classic case: theorem with a dummy h : True. Result is still True.
-    lean = make_lemma(theorem, "generalize_statement_by_weakening_hypotheses")
+    lean = make_lemma(theorem, "drop_unused_hyp")
     output = run_lean(lean)
     stmt = extract_theorem(output)
     return {"perturbed_statement": stmt, "is_true": True if stmt else "unknown"}
@@ -370,8 +370,8 @@ PERTURBATION_REGISTRY = [
         "description": "Converse (Q -> P). Truth unknown.",
     },
     {
-        "name": "generalize",
-        "fn": perturb_generalize,
+        "name": "drop_unused_hyp",
+        "fn": perturb_drop_unused_hyp,
         "description": "Remove unused Prop hypotheses. Statement stays True.",
     },
     # ── Typeclass-level perturbations ──────────────────────────────────────────
@@ -466,7 +466,7 @@ input to step *i+1*. If a step returns `None` the chain is marked `chain_broken`
 | Chain | Expected behaviour |
 |---|---|
 | `negate -> negate` | Double negation — recovers something close to original |
-| `generalize -> negate` | Negate a more general form |
+| `drop_unused_hyp -> negate` | Negate a more general form |
 | `tc_generalize -> tc_generalize` | Two steps up the typeclass hierarchy |
 | `tc_generalize -> negate` | Generalise then negate — always False |
 | `contrapose -> converse` | Gives the *inverse* (not P -> not Q) |
@@ -586,7 +586,7 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
 # ── Chains to run ──────────────────────────────────────────────────────────────
 CHAINS = [
     ["negate", "negate"],
-    ["generalize", "negate"],
+    ["drop_unused_hyp", "negate"],
     ["tc_generalize", "tc_generalize"],
     ["tc_generalize", "negate"],
     ["contrapose", "converse"],
