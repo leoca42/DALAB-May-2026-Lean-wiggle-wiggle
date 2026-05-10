@@ -54,6 +54,7 @@ This project has only suceeded in making a small demo dataset (perturbing 10 the
 
 Next Steps:
 - How can we make this faster?
+- How do we scale our solution to compute for 200k theorems? (see FinalDesignDoc.md for more details)
 - Are there more ways to perturb Lean statements we can add?
 - Go train a text embedder usign contrastive loss (or something) with a dataset
 
