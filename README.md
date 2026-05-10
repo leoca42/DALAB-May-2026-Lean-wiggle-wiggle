@@ -10,6 +10,17 @@ We perturb Lean theorem statements to create similar but distinct statements. We
 
 All peturbed Lean statements are checked by the Lean compiler to be valid Lean statements. However, many of them are mathematically incorrect. This project does not care whether a statement is true or not, just whether or not it is a valid Lean statement.
 
+# Examples:
+
+Original Statement:
+
+∀ {α : Type*} [inst : CommRing α] (a b : α), a * b = b * a
+
+Weakening the Hypothesis:
+
+∀ {α : Type*} [inst : Field α] (a b : α), a * b = b * a
+
+
 # Similar Existing Work
 - LeanDojo
     - This contained a way to perturb Lean proof states
@@ -39,6 +50,8 @@ Examples of Lean Theorem Search
 Running our code on a laptop, it takes about 5-30s per perturbation, primarily because using the Lean tactic itself is slow. This seems to be slower than asking frontier LLMs to perturb Lean statements.
 - However, our statements seem to be more accurate or be of a deeper perturbation than the LLM version. For example, our negations fully embed the negation into the statement using a Lean tactic, instead of jsut inserting a negation sign onto the statement.
 
+This project has only suceeded in making a small demo dataset (perturbing 10 theorems at a time). To make a full dataset of perturbed Lean theorem statements, we would need to find a massive speedup in the perturbation process and build infrstaurcture for the dataset.
+
 Next Steps:
 - How can we make this faster?
 - Are there more ways to perturb Lean statements we can add?
@@ -47,3 +60,8 @@ Next Steps:
 # Fun Fact
 
 This project is named "wiggle wiggle" as an alternate term for "perturbation", from a mysterious unnamed professor in the UW Math Department.
+
+# Credits
+- Vasily Ilin & Aristotle for the negate tactic
+- Theodore Meek for some mathlib dependency generalization inspiration
+
