@@ -61,7 +61,7 @@ def _extract_goal_or_none(output: str) -> str | None:
 def generalize_theorem(sig: str, type_str: str) -> str | None:
     output = _run_lean(
         f"import Wiggle\n\nexample : {type_str} := by\n"
-        f"  generalize_statement_by_weakening_hypotheses\n"
+        f"  drop_unused_hyp\n"
         f"  extract_goal\n"
         f"  sorry\n"
     )
@@ -113,11 +113,10 @@ def weaken_statement_by_weakening_conclusion_theorem(
 LEAN_CODE = """\
 import Wiggle
 
--- Generalization by weakening hypotheses.
--- The tactic removes Prop hypotheses that are not used by the final goal.
+-- Drop unused Prop hypotheses from the statement.
 lemma to_generalize (x : ℝ) (h_unused : True) :
     HasDerivAt Real.exp (Real.exp x) x := by
-  generalize_statement_by_weakening_hypotheses
+  drop_unused_hyp
   extract_goal
   sorry
 """
