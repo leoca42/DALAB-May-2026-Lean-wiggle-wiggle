@@ -1,4 +1,4 @@
-
+import re
 
 def flip_bound(sig: str, type_str: str) -> tuple[str, str] | None:
     """
