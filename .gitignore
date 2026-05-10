@@ -1,1 +1,7 @@
 /.lake
+__pycache__/
+*.pyc
+typeclass_implications.jsonl
+lean_synth_checks/
+mathlib_instances.jsonl
+instance_implications.jsonl

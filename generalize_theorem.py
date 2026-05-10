@@ -3,6 +3,7 @@ import re
 import subprocess
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+EXTRACTED_THEOREM_RE = re.compile(r"^theorem .*extracted.*$", re.MULTILINE)
 
 
 def run_lean_and_extract(lean_code: str, tmp_filename: str, label: str) -> None:
@@ -20,7 +21,7 @@ def run_lean_and_extract(lean_code: str, tmp_filename: str, label: str) -> None:
         )
 
         output = result.stdout + result.stderr
-        match = re.search(r"^theorem .*extracted.*$", output, re.MULTILINE)
+        match = EXTRACTED_THEOREM_RE.search(output)
         if match:
             print(f"{label} goal:")
             print(match.group(0))
@@ -32,8 +33,85 @@ def run_lean_and_extract(lean_code: str, tmp_filename: str, label: str) -> None:
             os.remove(tmp_path)
 
 
+def _run_lean(code: str) -> str:
+    tmp_path = os.path.join(PROJECT_DIR, "_generalize_api_tmp.lean")
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write(code)
+        result = subprocess.run(
+            ["lake", "env", "lean", tmp_path],
+            cwd=PROJECT_DIR,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        return result.stdout + result.stderr
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def _extract_goal_or_none(output: str) -> str | None:
+    if "error:" in output:
+        return None
+    match = EXTRACTED_THEOREM_RE.search(output)
+    return match.group(0) if match else None
+
+
+def generalize_theorem(sig: str, type_str: str) -> str | None:
+    output = _run_lean(
+        f"import Wiggle\n\nexample : {type_str} := by\n"
+        f"  generalize_statement_by_weakening_hypotheses\n"
+        f"  extract_goal\n"
+        f"  sorry\n"
+    )
+    return _extract_goal_or_none(output)
+
+
+def weaken_statement_by_strengthening_hypotheses_theorem(
+    sig: str,
+    type_str: str,
+    hypothesis_prop: str,
+) -> str | None:
+    output = _run_lean(
+        f"import Wiggle\n\nexample : {type_str} := by\n"
+        f"  weaken_statement_by_strengthening_hypotheses ({hypothesis_prop})\n"
+        f"  extract_goal\n"
+        f"  sorry\n"
+    )
+    return _extract_goal_or_none(output)
+
+
+def strengthen_statement_by_strengthening_conclusion_theorem(
+    sig: str,
+    type_str: str,
+    stronger_conclusion: str,
+) -> str | None:
+    output = _run_lean(
+        f"import Wiggle\n\nexample : {type_str} := by\n"
+        f"  strengthen_statement_by_strengthening_conclusion ({stronger_conclusion})\n"
+        f"  extract_goal\n"
+        f"  sorry\n"
+    )
+    return _extract_goal_or_none(output)
+
+
+def weaken_statement_by_weakening_conclusion_theorem(
+    sig: str,
+    type_str: str,
+    weaker_conclusion: str,
+) -> str | None:
+    output = _run_lean(
+        f"import Wiggle\n\nexample : {type_str} := by\n"
+        f"  weaken_statement_by_weakening_conclusion ({weaker_conclusion})\n"
+        f"  extract_goal\n"
+        f"  sorry\n"
+    )
+    return _extract_goal_or_none(output)
+
+
 LEAN_CODE = """\
-import Negate
+import Wiggle
 
 -- Generalization by weakening hypotheses.
 -- The tactic removes Prop hypotheses that are not used by the final goal.

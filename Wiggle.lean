@@ -1,6 +1,53 @@
 import Mathlib
 import Lean
 
+namespace Wiggle
+
+def jsonEscape (s : String) : String :=
+  let chars := (s.toList.map fun
+    | '"' => ['\\', '"']
+    | '\\' => ['\\', '\\']
+    | '\n' => ['\\', 'n']
+    | '\r' => ['\\', 'r']
+    | '\t' => ['\\', 't']
+    | c => [c]).flatten
+  String.ofList chars
+
+def jsonField (key value : String) : String :=
+  "\"" ++ jsonEscape key ++ "\":\"" ++ jsonEscape value ++ "\""
+
+def jsonNatField (key : String) (value : Nat) : String :=
+  "\"" ++ jsonEscape key ++ "\":" ++ toString value
+
+def jsonObject (fields : List String) : String :=
+  "{" ++ String.intercalate "," fields ++ "}"
+
+open Lean Elab Command Meta in
+elab "#wiggle_dump_instances" : command => do
+  let env ← getEnv
+  env.constants.forM fun name info => do
+    let isInst ← Command.liftCoreM <| Lean.Meta.isInstance name
+    if isInst then
+      let typeFmt ← liftTermElabM <| Meta.ppExpr info.type
+      let priority? ← Command.liftCoreM <| Lean.Meta.getInstancePriority? name
+      let attrKind? ← Command.liftCoreM <| Lean.Meta.getInstanceAttrKind? name
+      let priority := match priority? with
+        | some n => n
+        | none => 1000
+      let attrKind := match attrKind? with
+        | some .global => "global"
+        | some .scoped => "scoped"
+        | some .local => "local"
+        | none => "none"
+      IO.println <| jsonObject [
+        jsonField "name" (toString name),
+        jsonField "type" typeFmt.pretty,
+        jsonNatField "priority" priority,
+        jsonField "attrKind" attrKind
+      ]
+
+end Wiggle
+
 -- tactic to negate state, from Aristotle:
 open Lean Meta Elab Tactic in
 elab "revert_all" : tactic => do
