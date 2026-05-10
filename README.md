@@ -23,14 +23,12 @@ We found that existing work on synthetic Lean generation perturbed Lean proof st
 # Uses
 
 This project was inspired by two projects in the UW Math AI Lab, 
-- uw-math-ai/TheoremSearch: Semantic Search Over 9 million Mathematical Theorems 
-- uw-math-ai/math2vec: Universal math embedder 
+- [TheoremSearch](https://github.com/uw-math-ai/TheoremSearch)
+- [Math2Vec](https://github.com/uw-math-ai/math2vec)
 
 Theorem Search does retrieval of mathematically similar theorems from ArXiv and The Stacks Project by embedding all theorems/lemmas/corollaries with a text embedder then finding the closest theorems to a query in the embedding space.
 
-Math2Vec is attempting to improve the text embedding capability over both natural language math statements and Lean math statements.
-
-A synthetic dataset of perturbed Lean theorems could be used to train text embedders for Lean theorem retrieval using contrastive loss, contributing to theorem search on Lean.
+Math2Vec is attempting to improve the text embedding capability over both natural language math statements and Lean math statements, looking towards improving the Theorem Search project with a better text embedder for mathematical theorems. To better fine-tune a text embedder over Lean, this project could use a synthetic dataset of perturbed Lean statements to run constrastive loss -esque training 
 
 Examples of Lean Theorem Search
 - LeanFinder
