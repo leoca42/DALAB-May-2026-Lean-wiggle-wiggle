@@ -481,22 +481,22 @@
               "notes": "Only clears Prop hypotheses, not Type or data arguments. The canonical test case is a theorem with an explicit h : True parameter."
             },
             {
-              "name": "tc_generalize",
+              "name": "tc_weaken_hyp",
               "layer": "typeclass_python",
               "lean_tactic": null,
               "mechanism": "Replaces a typeclass in the hypothesis with a weaker parent class from the Mathlib hierarchy (e.g. [AddCommMonoid α] → [AddMonoid α]). Uses BFS up the _HARDCODED_PARENTS graph (depth=2), tries each ancestor, and keeps the first one that Lean type-checks.",
-              "is_true": true,
-              "is_true_reason": "A weaker hypothesis means the theorem applies to a strictly larger set of types. The original proof still works; the conclusion is unchanged.",
-              "is_true_invariant": true,
+              "is_true": "unknown",
+              "is_true_reason": "A weaker hypothesis means the theorem must hold for a strictly LARGER class of types — i.e. the variant is a STRONGER claim than the original. The original proof relied on the strictly stronger structure (e.g. commutativity in AddCommMonoid) and no longer applies. Whether the variant is still true depends on the specific theorem; e.g. a + b = b + a fails in a general AddMonoid (string concatenation).",
+              "is_true_invariant": false,
               "applies_to": "Theorems with a typeclass in square brackets [TC α] where TC has a parent in the hardcoded hierarchy.",
               "does_not_apply_to": "Theorems with no bracket typeclass (e.g. plain Nat theorems), or where no weaker parent compiles.",
               "input_example":  "∀ {α} [AddCommMonoid α] (a b : α), a + b = b + a",
               "output_example": "∀ {α} [AddMonoid α] (a b : α), a + b = b + a",
               "output_form": "Clean ∀-type string (not a Lean extracted theorem)",
-              "notes": "Compiled with `example : <type> := by sorry` to confirm the weaker class provides all required operations. Uses typeclass_mutate.generalize_statement_by_weakening_hypotheses."
+              "notes": "Compiled with `example : <type> := by sorry` to confirm the weaker class provides all required operations. The compile check only verifies WELL-TYPEDNESS, NOT provability — so a passing variant may still be mathematically false. Uses typeclass_mutate.weaken_hypothesis_typeclass."
             },
             {
-              "name": "tc_weaken_hyp",
+              "name": "tc_strengthen_hyp",
               "layer": "typeclass_python",
               "lean_tactic": null,
               "mechanism": "Replaces a typeclass in the hypothesis with a stronger child class (e.g. [AddCommMonoid α] → [AddCommGroup α]). BFS down the children graph.",
@@ -508,7 +508,7 @@
               "input_example":  "∀ {α} [AddCommMonoid α] (a b : α), a + b = b + a",
               "output_example": "∀ {α} [AddCommGroup α] (a b : α), a + b = b + a",
               "output_form": "Clean ∀-type string",
-              "notes": "Uses typeclass_mutate.weaken_statement_by_strengthening_hypotheses. Note the naming convention: 'weakening the statement' by requiring a stronger class means fewer types qualify."
+              "notes": "Uses typeclass_mutate.strengthen_hypothesis_typeclass. The variant is a WEAKER statement (fewer types qualify) but remains true."
             },
             {
               "name": "tc_strengthen_conc",
@@ -538,7 +538,7 @@
               "input_example":  "∀ {R} [CommRing R] [IsDomain R], IsDomain (Polynomial R)",
               "output_example": "∀ {R} [CommRing R] [IsDomain R], Nontrivial (Polynomial R)",
               "output_form": "Clean ∀-type string",
-              "notes": "Uses typeclass_mutate.weaken_statement_by_weakening_conclusion."
+              "notes": "Uses typeclass_mutate.weaken_conclusion_typeclass."
             },
             {
               "name": "flip_bound",

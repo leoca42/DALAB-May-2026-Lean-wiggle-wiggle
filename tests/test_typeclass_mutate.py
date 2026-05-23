@@ -12,10 +12,10 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from typeclass_mutate import (
-    generalize_statement_by_weakening_hypotheses,
-    weaken_statement_by_strengthening_hypotheses,
-    strengthen_statement_by_strengthening_conclusion,
-    weaken_statement_by_weakening_conclusion,
+    weaken_hypothesis_typeclass,
+    strengthen_hypothesis_typeclass,
+    strengthen_conclusion_typeclass,
+    weaken_conclusion_typeclass,
 )
 
 # ── Test theorem ──────────────────────────────────────────────────────────────
@@ -40,14 +40,14 @@ print(f"  sig  : {SIG}")
 print(f"  type : {TYPE_STR}")
 print()
 
-# ── Method 1: generalize by weakening hypotheses ──────────────────────────────
+# ── Method 1: weaken hypothesis typeclass ─────────────────────────────────────
 print(SEP)
-print("METHOD 1 — generalize_statement_by_weakening_hypotheses")
+print("METHOD 1 — weaken_hypothesis_typeclass")
 print("  Strategy : replace [AddCommMonoid α] with a WEAKER parent class")
-print("  Effect   : theorem becomes more general (applies to more types)")
+print("  Effect   : variant claims the conclusion for a LARGER class of types")
 print()
 
-result = generalize_statement_by_weakening_hypotheses(SIG, TYPE_STR)
+result = weaken_hypothesis_typeclass(SIG, TYPE_STR)
 if result:
     _, new_type = result
     print(f"  BEFORE : {TYPE_STR}")
@@ -56,14 +56,14 @@ else:
     print("  (no valid substitution found)")
 print()
 
-# ── Method 2: weaken by strengthening hypotheses ─────────────────────────────
+# ── Method 2: strengthen hypothesis typeclass ────────────────────────────────
 print(SEP)
-print("METHOD 2 — weaken_statement_by_strengthening_hypotheses")
+print("METHOD 2 — strengthen_hypothesis_typeclass")
 print("  Strategy : replace [AddCommMonoid α] with a STRONGER child class")
-print("  Effect   : theorem becomes weaker (applies to fewer types)")
+print("  Effect   : variant restricts to a narrower class of types")
 print()
 
-result = weaken_statement_by_strengthening_hypotheses(SIG, TYPE_STR)
+result = strengthen_hypothesis_typeclass(SIG, TYPE_STR)
 if result:
     _, new_type = result
     print(f"  BEFORE : {TYPE_STR}")
@@ -100,14 +100,14 @@ print(f"  sig  : {SIG2}")
 print(f"  type : {TYPE_STR2}")
 print()
 
-# ── Method 3: strengthen by strengthening conclusion ─────────────────────────
+# ── Method 3: strengthen conclusion typeclass ────────────────────────────────
 print(SEP)
-print("METHOD 3 — strengthen_statement_by_strengthening_conclusion")
+print("METHOD 3 — strengthen_conclusion_typeclass")
 print("  Strategy : replace IsDomain in conclusion with a STRONGER predicate")
 print("  Effect   : theorem becomes stronger (claims more about the output)")
 print()
 
-result = strengthen_statement_by_strengthening_conclusion(SIG2, TYPE_STR2)
+result = strengthen_conclusion_typeclass(SIG2, TYPE_STR2)
 if result:
     _, new_type = result
     print(f"  BEFORE : {TYPE_STR2}")
@@ -116,14 +116,14 @@ else:
     print("  (no valid substitution found)")
 print()
 
-# ── Method 4: weaken by weakening conclusion ──────────────────────────────────
+# ── Method 4: weaken conclusion typeclass ────────────────────────────────────
 print(SEP)
-print("METHOD 4 — weaken_statement_by_weakening_conclusion")
+print("METHOD 4 — weaken_conclusion_typeclass")
 print("  Strategy : replace IsDomain in conclusion with a WEAKER predicate")
 print("  Effect   : theorem becomes weaker (claims less about the output)")
 print()
 
-result = weaken_statement_by_weakening_conclusion(SIG2, TYPE_STR2)
+result = weaken_conclusion_typeclass(SIG2, TYPE_STR2)
 if result:
     _, new_type = result
     print(f"  BEFORE : {TYPE_STR2}")

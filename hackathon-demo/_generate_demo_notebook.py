@@ -25,7 +25,7 @@ theorems, then save every result (single and chained) as a structured JSONL data
 | Layer | What it does |
 |---|---|
 | **Lean tactics** | `negate`, `contrapose`, `converse`, `drop_unused_hyp` — run via `lake env lean` |
-| **Typeclass mutations** | `tc_generalize`, `tc_weaken_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` — Python text substitution verified by Lean |
+| **Typeclass mutations** | `tc_weaken_hyp`, `tc_strengthen_hyp`, `tc_weaken_conc`, `tc_strengthen_conc` — Python text substitution verified by Lean. Each name describes what happens to the typeclass at that position. |
 | **Bound perturbations** | `flip_bound`, `bound_tighter` — regex-based inequality/constant manipulation |
 
 Each output record tracks: original statement · perturbations applied (in order) ·
@@ -286,8 +286,8 @@ Every perturbation function accepts a `theorem` dict and returns:
 | `contrapose` | `True` | Logically equivalent to original |
 | `converse` | `"unknown"` | May or may not hold |
 | `drop_unused_hyp` | `True` | Removing unused hyps keeps provability |
-| `tc_generalize` | `True` | Weaker hypothesis — same conclusion still holds |
-| `tc_weaken_hyp` | `True` | Stronger hypothesis — conclusion trivially holds |
+| `tc_weaken_hyp` | `"unknown"` | Weaker TC in hypothesis = stronger statement (must hold for more types); original proof no longer applies |
+| `tc_strengthen_hyp` | `True` | Stronger TC in hypothesis = narrower domain; conclusion still holds for those types |
 | `tc_strengthen_conc` | `"unknown"` | Claiming more — may fail |
 | `tc_weaken_conc` | `True` | Claiming less — follows from original |
 | `flip_bound` | `"unknown"` | Flipping `<`/`>` or `≤`/`≥` changes meaning; may or may not hold |
@@ -333,48 +333,55 @@ def perturb_drop_unused_hyp(theorem: dict) -> dict:
 print("Lean-tactic perturbation functions defined.")"""
 
 CELL_TC_PERTURBS = r"""# ── Typeclass-level perturbations ─────────────────────────────────────────────
+# Names describe what happens to the TYPECLASS at that position.
 # These use typeclass_mutate: Python text substitution guided by the Mathlib
 # typeclass hierarchy, then Lean compilation to confirm type-checking.
 
 from typeclass_mutate import (
-    generalize_statement_by_weakening_hypotheses    as _tc_generalize,
-    weaken_statement_by_strengthening_hypotheses    as _tc_weaken_hyp,
-    strengthen_statement_by_strengthening_conclusion as _tc_strengthen_conc,
-    weaken_statement_by_weakening_conclusion         as _tc_weaken_conc,
+    weaken_hypothesis_typeclass     as _tc_weaken_hyp,
+    strengthen_hypothesis_typeclass as _tc_strengthen_hyp,
+    strengthen_conclusion_typeclass as _tc_strengthen_conc,
+    weaken_conclusion_typeclass     as _tc_weaken_conc,
 )
 
 
-def perturb_tc_generalize(theorem: dict) -> dict:
-    # Replace typeclass in hypothesis with WEAKER parent.
-    # Example: [AddCommMonoid a] -> [AddMonoid a]
-    # More general statement, original proof still works. is_true = True.
-    result = _tc_generalize(theorem["id"], theorem["type_str"])
-    stmt = result[1] if result else None
-    return {"perturbed_statement": stmt, "is_true": True if stmt else "unknown"}
-
-
 def perturb_tc_weaken_hyp(theorem: dict) -> dict:
-    # Replace typeclass in hypothesis with STRONGER child.
-    # Example: [AddCommMonoid a] -> [AddCommGroup a]
-    # Restricts the domain of applicability; conclusion still holds. is_true = True.
+    # Replace typeclass in hypothesis with a WEAKER parent class.
+    # Example: [AddCommMonoid a] -> [AddMonoid a]
+    # Less restrictive hypothesis = more general claim; the variant must
+    # hold for a STRICTLY LARGER class of types. The original proof used
+    # the stronger structure (e.g. commutativity) and no longer applies,
+    # so the variant may be true or false.
     result = _tc_weaken_hyp(theorem["id"], theorem["type_str"])
+    stmt = result[1] if result else None
+    return {"perturbed_statement": stmt, "is_true": "unknown"}
+
+
+def perturb_tc_strengthen_hyp(theorem: dict) -> dict:
+    # Replace typeclass in hypothesis with a STRONGER child class.
+    # Example: [AddCommMonoid a] -> [AddCommGroup a]
+    # More restrictive hypothesis = narrower domain. Any type satisfying
+    # the stronger class also satisfied the original, so the conclusion
+    # still holds.
+    result = _tc_strengthen_hyp(theorem["id"], theorem["type_str"])
     stmt = result[1] if result else None
     return {"perturbed_statement": stmt, "is_true": True if stmt else "unknown"}
 
 
 def perturb_tc_strengthen_conc(theorem: dict) -> dict:
-    # Replace typeclass in conclusion with STRONGER child.
+    # Replace typeclass in conclusion with a STRONGER child class.
     # Example: IsDomain -> EuclideanDomain in the conclusion.
-    # Claims more than original. is_true = "unknown".
+    # The variant claims a stronger structural property and may not be true.
     result = _tc_strengthen_conc(theorem["id"], theorem["type_str"])
     stmt = result[1] if result else None
     return {"perturbed_statement": stmt, "is_true": "unknown"}
 
 
 def perturb_tc_weaken_conc(theorem: dict) -> dict:
-    # Replace typeclass in conclusion with WEAKER parent.
+    # Replace typeclass in conclusion with a WEAKER parent class.
     # Example: IsDomain -> Nontrivial in the conclusion.
-    # Claims less than original; follows immediately. is_true = True.
+    # The variant claims a weaker property; follows from the original by
+    # definition of the hierarchy.
     result = _tc_weaken_conc(theorem["id"], theorem["type_str"])
     stmt = result[1] if result else None
     return {"perturbed_statement": stmt, "is_true": True if stmt else "unknown"}
@@ -445,14 +452,15 @@ PERTURBATION_REGISTRY = [
         "description": "Remove unused Prop hypotheses. Statement stays True.",
     },
     # ── Typeclass-level perturbations ──────────────────────────────────────────
-    {
-        "name": "tc_generalize",
-        "fn": perturb_tc_generalize,
-        "description": "Weaken typeclass in hypothesis (parent class). True.",
-    },
+    # Names describe what happens to the typeclass at that position.
     {
         "name": "tc_weaken_hyp",
         "fn": perturb_tc_weaken_hyp,
+        "description": "Weaken typeclass in hypothesis (parent class). Unknown.",
+    },
+    {
+        "name": "tc_strengthen_hyp",
+        "fn": perturb_tc_strengthen_hyp,
         "description": "Strengthen typeclass in hypothesis (child class). True.",
     },
     {
@@ -548,8 +556,8 @@ input to step *i+1*. If a step returns `None` the chain is marked `chain_broken`
 |---|---|
 | `negate -> negate` | Double negation — recovers something close to original |
 | `drop_unused_hyp -> negate` | Negate a more general form |
-| `tc_generalize -> tc_generalize` | Two steps up the typeclass hierarchy |
-| `tc_generalize -> negate` | Generalise then negate — always False |
+| `tc_weaken_hyp -> tc_weaken_hyp` | Two steps up the typeclass hierarchy |
+| `tc_weaken_hyp -> negate` | Generalise then negate — always False |
 | `contrapose -> converse` | Gives the *inverse* (not P -> not Q) |
 | `converse -> negate` | Negate the converse |
 | `flip_bound -> negate` | Flip inequality then negate — False by dominance rule |
@@ -675,8 +683,8 @@ def apply_chain(theorem: dict, perturbation_names: list[str]) -> dict:
 CHAINS = [
     ["negate", "negate"],
     ["drop_unused_hyp", "negate"],
-    ["tc_generalize", "tc_generalize"],
-    ["tc_generalize", "negate"],
+    ["tc_weaken_hyp", "tc_weaken_hyp"],
+    ["tc_weaken_hyp", "negate"],
     ["contrapose", "converse"],
     ["converse", "negate"],
     # Bounds chains

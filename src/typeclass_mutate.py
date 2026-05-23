@@ -4,11 +4,27 @@ typeclass_mutate.py
 Systematically changes the generalization level of a typeclass in a Lean 4
 theorem statement using the Mathlib typeclass hierarchy.
 
-Four perturbation methods:
-  weaken_statement_by_strengthening_hypotheses   – [TC α] → [StrongerChild α]
-  strengthen_statement_by_strengthening_conclusion – conclusion [TC α] → [StrongerChild α]
-  weaken_statement_by_weakening_conclusion         – conclusion [TC α] → [WeakerParent α]
-  generalize_statement_by_weakening_hypotheses     – [TC α] → [WeakerParent α]
+Four perturbation methods (named for what they do to the *typeclass*):
+
+  weaken_hypothesis_typeclass    – hypothesis [TC α] → [WeakerParent α]
+                                   (e.g. [AddCommMonoid α] → [AddMonoid α])
+                                   The variant claims the conclusion holds
+                                   over a LARGER class of types — i.e. a
+                                   STRONGER statement; may not be true.
+
+  strengthen_hypothesis_typeclass – hypothesis [TC α] → [StrongerChild α]
+                                   (e.g. [AddCommMonoid α] → [AddCommGroup α])
+                                   Narrower class of types — i.e. a WEAKER
+                                   statement; original conclusion still
+                                   holds for any qualifying type.
+
+  strengthen_conclusion_typeclass – conclusion [TC α] → [StrongerChild α]
+                                   Claims a stronger structural property;
+                                   may not be true.
+
+  weaken_conclusion_typeclass    – conclusion [TC α] → [WeakerParent α]
+                                   Claims a weaker property; follows from
+                                   the original by definition of the hierarchy.
 
 Hierarchy sources (in order of preference):
   1. Lean metaprogramming – getParentStructures (for parents)
@@ -535,15 +551,17 @@ def _get_prop_tc_descendants(tc_name: str, depth: int) -> list[str]:
 # The four perturbation methods
 # ---------------------------------------------------------------------------
 
-def generalize_statement_by_weakening_hypotheses(
+def weaken_hypothesis_typeclass(
     sig: str,
     type_str: str,
     depth: int = 2,
 ) -> tuple[str, str] | None:
     """
     Find a typeclass [TC α] in the hypotheses and replace TC with a weaker
-    ancestor class (moving UP the hierarchy). Returns (sig, new_type_str)
-    for the first substitution that compiles, or None.
+    ancestor class (moving UP the hierarchy). The variant is a STRONGER
+    statement (claims the conclusion holds over more types) and may not be
+    true. Returns (sig, new_type_str) for the first substitution that
+    compiles, or None.
     """
     hyp_part, _ = _split_hyps_conclusion(type_str)
     brackets = _find_tc_brackets(hyp_part or type_str)
@@ -557,14 +575,16 @@ def generalize_statement_by_weakening_hypotheses(
     return None
 
 
-def weaken_statement_by_strengthening_hypotheses(
+def strengthen_hypothesis_typeclass(
     sig: str,
     type_str: str,
     depth: int = 2,
 ) -> tuple[str, str] | None:
     """
     Find a typeclass [TC α] in the hypotheses and replace TC with a stronger
-    descendant class (moving DOWN the hierarchy). Returns (sig, new_type_str)
+    descendant class (moving DOWN the hierarchy). The variant is a WEAKER
+    statement (applies to fewer types) but remains true: any type satisfying
+    the stronger class also satisfies the original. Returns (sig, new_type_str)
     for the first substitution that compiles, or None.
     """
     hyp_part, _ = _split_hyps_conclusion(type_str)
@@ -579,14 +599,15 @@ def weaken_statement_by_strengthening_hypotheses(
     return None
 
 
-def strengthen_statement_by_strengthening_conclusion(
+def strengthen_conclusion_typeclass(
     sig: str,
     type_str: str,
     depth: int = 2,
 ) -> tuple[str, str] | None:
     """
     Find a typeclass in the conclusion and replace it with a stronger
-    descendant (moving DOWN = more specific = stronger conclusion).
+    descendant (moving DOWN = more specific). The variant claims a stronger
+    structural property and may not be true.
 
     Handles two conclusion forms:
       • [inst : TC α]  – structural typeclass in a binder
@@ -624,14 +645,15 @@ def strengthen_statement_by_strengthening_conclusion(
     return None
 
 
-def weaken_statement_by_weakening_conclusion(
+def weaken_conclusion_typeclass(
     sig: str,
     type_str: str,
     depth: int = 2,
 ) -> tuple[str, str] | None:
     """
     Find a typeclass in the conclusion and replace it with a weaker
-    ancestor (moving UP = more general = weaker conclusion).
+    ancestor (moving UP = more general). The variant claims a weaker
+    property and follows from the original by the hierarchy.
 
     Handles two conclusion forms:
       • [inst : TC α]  – structural typeclass in a binder
@@ -695,20 +717,20 @@ def _demo() -> None:
         print(f"\n{'='*60}")
         print(f"Original [{name}]:\n  {type_str}")
 
-        result = generalize_statement_by_weakening_hypotheses(name, type_str)
-        print(f"\ngeneralize_statement_by_weakening_hypotheses:")
+        result = weaken_hypothesis_typeclass(name, type_str)
+        print(f"\nweaken_hypothesis_typeclass:")
         print(f"  {result[1] if result else '(none found)'}")
 
-        result = weaken_statement_by_strengthening_hypotheses(name, type_str)
-        print(f"\nweaken_statement_by_strengthening_hypotheses:")
+        result = strengthen_hypothesis_typeclass(name, type_str)
+        print(f"\nstrengthen_hypothesis_typeclass:")
         print(f"  {result[1] if result else '(none found)'}")
 
-        result = strengthen_statement_by_strengthening_conclusion(name, type_str)
-        print(f"\nstrengthen_statement_by_strengthening_conclusion:")
+        result = strengthen_conclusion_typeclass(name, type_str)
+        print(f"\nstrengthen_conclusion_typeclass:")
         print(f"  {result[1] if result else '(none found)'}")
 
-        result = weaken_statement_by_weakening_conclusion(name, type_str)
-        print(f"\nweaken_statement_by_weakening_conclusion:")
+        result = weaken_conclusion_typeclass(name, type_str)
+        print(f"\nweaken_conclusion_typeclass:")
         print(f"  {result[1] if result else '(none found)'}")
 
 
