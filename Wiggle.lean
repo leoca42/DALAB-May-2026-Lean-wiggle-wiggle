@@ -105,6 +105,43 @@ macro "converse" : tactic => `(tactic|
   )
 )
 
+-- Tactic for getting the inverse of an implication: `P → Q` becomes `¬P → ¬Q`.
+-- Logically equivalent to the converse (`¬P → ¬Q ↔ Q → P` by contrapositive),
+-- and never to the original. Completes the classical foursome
+-- {original, contrapositive, converse, inverse}.
+open Lean.Elab.Tactic in
+macro "inverse" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    revert_props
+    try (simp only [← and_imp])
+    apply (by admit : ∀ {p q : Prop}, (¬p → ¬q) → (p → q))
+    guard_goal_nums 1
+  )
+)
+
+-- De Morgan / connective rewriting via a fixed `simp only` lemma set.
+-- Equivalence-preserving (truth unchanged from anchor). Returns the rewritten
+-- statement via `extract_goal`. If `simp` makes no progress the Python wrapper
+-- detects the no-op and emits no record.
+--
+-- Lemma set rationale:
+--   not_and_or, not_or            -- De Morgan
+--   not_forall, not_exists        -- quantifier De Morgan
+--   imp_iff_not_or                -- material implication
+--   and_imp                       -- curry / uncurry
+--   not_not                       -- double negation elim
+open Lean.Elab.Tactic in
+macro "de_morgan_rewrite" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    revert_props
+    simp only [not_and_or, not_or, not_forall, not_exists,
+               imp_iff_not_or, and_imp, not_not]
+    guard_goal_nums 1
+  )
+)
+
 
 -- Removes Prop-valued hypotheses that are not used by the target or by later
 -- hypotheses. This implements generalization by weakening hypotheses.

@@ -1,19 +1,43 @@
-# Pipeline (in-progress)
+# Pipeline
 
-This is where the scaling work lives: turning the 10-theorem hackathon demo
-into a real pipeline that can perturb 200k Mathlib theorem statements (see
-`../docs/Final Design Doc.md`).
+CLI runners for the Wiggle perturbation library (`src/wiggle/`).
 
-## Current state
+The library does the work; scripts in this directory just wire it up to a
+corpus (curated theorems, HuggingFace dataset slice, etc.) and an output file.
 
-| File | Status |
+## Scripts
+
+| File | Purpose |
 |---|---|
-| `perturb.ipynb` | **Seed.** Has plumbing for loading Mathlib statements from HuggingFace, a `TRANSFORMS` registry, truth-propagation rules, and an `apply_perturbation_chains` function. Does **not** yet run end-to-end, parallelise, deduplicate, or push results back to HuggingFace. |
+| `run_demo.py` | Apply every perturbation in the registry to a curated set of 10 theorems. Mirrors what `hackathon-demo/demo.ipynb` did, but as plain Python. Outputs JSONL. |
+| `run_hf_corpus.py` | Pull anchors from a HuggingFace dataset (`FrenzyMath/mathlib_informal_v4.19.0`), run perturbation chains, and write JSONL. Replacement for the archived `hackathon-demo/perturb.ipynb`. |
 
-## Planned work
+## Usage
 
-1. **Parallel runner** — `multiprocessing.Pool` (or persistent Lean server) over batched anchors, each batch with its own temp Lean file to avoid race conditions.
-2. **Deduplication** — on `(anchor_type, variant_type)` before writing.
-3. **Checkpointing** — periodic flush to JSONL / HuggingFace push (default every 50 batches per the Final Design Doc).
-4. **CLI entry point** — `python -m pipeline.run --batch-size 32 --max-chain-depth 4` style, so it can be invoked outside a notebook.
-5. **Evaluation hooks** — per-pair embedding cosine similarity, distinctness verification (`decide` / `aesop`), dataset-level diversity metrics.
+```bash
+# From the project root.
+python pipeline/run_demo.py                              # curated theorems -> stdout JSONL
+python pipeline/run_demo.py --output data/demo.jsonl     # ...or to a file
+
+python pipeline/run_hf_corpus.py --limit 50              # 50 random anchors
+python pipeline/run_hf_corpus.py --indices 5145,181597   # specific HF indices
+```
+
+Both scripts require `lake env lean` on `PATH`. The first run will compile the
+Lean tactics in `Wiggle.lean`; subsequent runs reuse the cache under `.lake/`.
+
+## How to add a new perturbation
+
+You don't touch the runners. Instead:
+
+1. Implement the transform in `src/wiggle/transforms/<layer>.py`.
+2. Register it in `src/wiggle/registry.py` (`PERTURBATIONS` list).
+3. Add a test in `tests/test_<perturbation>.py`.
+
+The runners pick it up automatically from the registry.
+
+## What was here before
+
+`perturb.ipynb` used to live in this directory as a notebook prototype. It has
+been moved to `hackathon-demo/perturb.ipynb` as a frozen artifact of the
+hackathon. All active work has moved to plain Python files.

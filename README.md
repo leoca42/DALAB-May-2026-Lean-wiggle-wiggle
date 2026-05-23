@@ -4,7 +4,7 @@
 
 ```
 .                                        # Lake project root
-├── Wiggle.lean                          # Lean tactics (negate, contrapose, converse, etc.)
+├── Wiggle.lean                          # Lean tactics (negate, contrapose, converse, inverse, de_morgan_rewrite, ...)
 ├── lakefile.toml, lean-toolchain, ...   # Lake build config (must stay at root)
 │
 ├── docs/                                # Design documents
@@ -13,28 +13,64 @@
 ├── src/                                 # Python library — the importable core
 │   ├── bounds.py                        # Inequality / numeric bound perturbations
 │   ├── typeclass_mutate.py              # Typeclass hierarchy perturbations
-│   └── instance_graph/                  # Mathlib instance dump + dependency builder
+│   ├── instance_graph/                  # Mathlib instance dump + dependency builder
+│   └── wiggle/                          # Phase 2: clean perturbation package
+│       ├── lean_runner.py               # Single home for `lake env lean` invocations
+│       ├── registry.py                  # Canonical PERTURBATIONS list (single source of truth)
+│       ├── propagation.py               # Symbolic is_true / compose_truth
+│       ├── chains.py                    # apply_chain — per-anchor chain runner
+│       ├── pipeline.py                  # run_pipeline — corpus-level runner
+│       └── transforms/                  # Per-layer transform implementations
+│           ├── logical.py               #   negate, contrapose, converse, inverse, drop_unused_hyp
+│           ├── connectives.py           #   de_morgan_rewrite
+│           ├── quantifiers.py           #   quantifier_swap
+│           ├── typeclass.py             #   tc_weaken_hyp, tc_strengthen_hyp, tc_*_conc
+│           └── bounds.py                #   flip_bound, bound_tighter
+│
+├── pipeline/                            # CLI runners on top of src/wiggle/
+│   ├── run_demo.py                      # 10 curated theorems → JSONL (replaces demo.ipynb)
+│   └── run_hf_corpus.py                 # HuggingFace dataset slice → JSONL (replaces perturb.ipynb)
 │
 ├── scripts/                             # Per-tactic CLI demos and one-off utilities
-├── tests/                               # Manual / smoke tests
+├── tests/                               # Unit tests (registry, propagation, new perturbations)
 ├── hackathon-demo/                      # Frozen artifacts from the hackathon presentation
-├── pipeline/                            # In-progress scaling pipeline (HF dataset, parallel runner, ...)
-└── data/                                # Generated dumps (gitignored, regenerable from src/instance_graph/)
+└── data/                                # Generated dumps (gitignored)
 ```
 
 See each subdirectory's `README.md` for details. The hackathon demo lives in
 [`hackathon-demo/`](hackathon-demo/); the scaling roadmap is in
 [`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md).
 
+## Running
+
+```bash
+# Apply every registered perturbation to 10 curated theorems and write JSONL:
+python pipeline/run_demo.py
+
+# Apply perturbation chains to a slice of the HuggingFace Mathlib dataset:
+python pipeline/run_hf_corpus.py --limit 10
+
+# Run the Python unit tests (no Lean required):
+python tests/test_registry.py
+python tests/test_propagation.py
+python tests/test_inverse.py
+python tests/test_de_morgan.py
+python tests/test_quantifier_swap.py
+```
+
 ## What this project does
 
-We perturb Lean theorem statements to create similar but distinct statements. We do this using Lean tactics to perturb the Lean statements by:
-- Finding a negation
-- Finding a contrapositive
-- Finding a converse
-- Generalizing statements by removing hypotheses
-- Strengthening or weakening the hypotheses or conclusions by going up or down the mathlib typeclass dependency tree
-- Shifting numerical bounds in the statement
+We perturb Lean theorem statements to create similar but distinct statements,
+using a mix of Lean tactics and Python text manipulation. The current registry
+exposes **13 perturbations** across 5 layers:
+
+| Layer | Perturbations |
+|---|---|
+| Logical (Lean tactic) | `negate`, `contrapose`, `converse`, `inverse`, `drop_unused_hyp` |
+| Connective rewriting (Lean tactic) | `de_morgan_rewrite` |
+| Quantifier scope (Python + Lean validity oracle) | `quantifier_swap` |
+| Typeclass mutation (Python + Lean validity oracle) | `tc_weaken_hyp`, `tc_strengthen_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` |
+| Bound mutation (regex) | `flip_bound`, `bound_tighter` |
 
 All peturbed Lean statements are checked by the Lean compiler to be valid Lean statements. However, many of them are mathematically incorrect. This project does not care whether a statement is true or not, just whether or not it is a valid Lean statement.
 
