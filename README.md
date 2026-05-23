@@ -27,19 +27,32 @@
 │           ├── typeclass.py             #   tc_weaken_hyp, tc_strengthen_hyp, tc_*_conc
 │           └── bounds.py                #   flip_bound, bound_tighter
 │
+│       ├── parallel.py                  #   ProcessPoolExecutor + drain + time-budget
+│       ├── shards.py                    #   atomic JSONL shards + resume scan
+│       └── run_logging.py               #   per-worker JSONL logs + heartbeat
+│
 ├── pipeline/                            # CLI runners on top of src/wiggle/
 │   ├── run_demo.py                      # 10 curated theorems → JSONL (replaces demo.ipynb)
-│   └── run_hf_corpus.py                 # HuggingFace dataset slice → JSONL (replaces perturb.ipynb)
+│   └── run_hf_corpus.py                 # HuggingFace dataset slice → sharded JSONL
 │
-├── scripts/                             # Per-tactic CLI demos and one-off utilities
-├── tests/                               # Unit tests (registry, propagation, new perturbations)
+├── scripts/                             # Per-tactic CLI demos, bench, and Slurm wrapper
+│   ├── bench_backends.py                # server vs subprocess wallclock comparison
+│   └── wiggle.sbatch                    # generic Slurm batch script for run_hf_corpus.py
+├── tests/                               # Unit tests — see tests/README.md
+├── docs/                                # Design docs + HYAK_SETUP.md
 ├── hackathon-demo/                      # Frozen artifacts from the hackathon presentation
 └── data/                                # Generated dumps (gitignored)
 ```
 
-See each subdirectory's `README.md` for details. The hackathon demo lives in
-[`hackathon-demo/`](hackathon-demo/); the scaling roadmap is in
-[`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md).
+See each subdirectory's `README.md` for details:
+
+- [`tests/README.md`](tests/README.md) — how to run the fast vs. live test suites, mocking pattern, recipe for adding a new perturbation test.
+- [`scripts/README.md`](scripts/README.md) — per-tactic demos, benchmark, Slurm wrapper.
+- [`pipeline/README.md`](pipeline/README.md) — corpus runners and dataset format.
+- [`docs/HYAK_SETUP.md`](docs/HYAK_SETUP.md) — end-to-end guide for running on UW Hyak (or any Slurm cluster): env bootstrap, dataset pre-download, submit/monitor, resume after walltime, sizing table.
+- [`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md) — overall scaling roadmap.
+
+The hackathon demo lives in [`hackathon-demo/`](hackathon-demo/).
 
 ## Running
 
@@ -47,16 +60,32 @@ See each subdirectory's `README.md` for details. The hackathon demo lives in
 # Apply every registered perturbation to 10 curated theorems and write JSONL:
 python pipeline/run_demo.py
 
-# Apply perturbation chains to a slice of the HuggingFace Mathlib dataset:
-python pipeline/run_hf_corpus.py --limit 10
+# Sharded run over a HuggingFace dataset slice using N parallel workers:
+python pipeline/run_hf_corpus.py --limit 1000 --num-workers 8
 
-# Run the Python unit tests (no Lean required):
-python tests/test_registry.py
-python tests/test_propagation.py
-python tests/test_inverse.py
-python tests/test_de_morgan.py
-python tests/test_quantifier_swap.py
+# Same, with a 23-hour wall-budget; SIGUSR1 (or `Ctrl-C` followed by re-run)
+# drains cleanly and resumes on the next submission:
+python pipeline/run_hf_corpus.py --limit 50000 --num-workers 32 \
+    --shard-dir data/shards/run-001 --log-dir logs/run-001 \
+    --time-budget 23h
+
+# Submit the same as a Slurm job (see docs/HYAK_SETUP.md):
+sbatch scripts/wiggle.sbatch
+
+# Run the Python unit tests (no Lean required, < 5s):
+python -m pytest tests/ --ignore=tests/test_typeclass_mutate.py
 ```
+
+Key flags for [`pipeline/run_hf_corpus.py`](pipeline/run_hf_corpus.py):
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `--num-workers N` | `SLURM_CPUS_PER_TASK` or `os.cpu_count()` | Parallel subprocess count. Each worker keeps its own Lean LSP server warm. |
+| `--shard-dir PATH` | `data/shards/<run-id>/` | Sharded JSONL output — one shard per worker, atomic-rewrite on flush. |
+| `--log-dir PATH` | `logs/<run-id>/` | Per-worker JSONL logs + `heartbeat.jsonl`. |
+| `--time-budget DUR` | unlimited | Wallclock budget — accepts `23h`/`90m`/`3600s`. Workers in-flight finish their current anchor. |
+| `--run-id NAME` | timestamp | Resume by passing the same `--run-id` on resubmission. |
+| `--no-resume` | off | Re-process every anchor even if its signature already appears in the shard dir. |
 
 ## What this project does
 
@@ -116,6 +145,8 @@ Running our code on a laptop, it takes about 5-30s per perturbation, primarily b
 
 This project has only suceeded in making a small demo dataset (perturbing 10 theorems at a time). To make a full dataset of perturbed Lean theorem statements, we would need to find a massive speedup in the perturbation process and build infrstaurcture for the dataset.
 
+Most of the speedup and scaling work is now in place — see [`docs/HYAK_SETUP.md`](docs/HYAK_SETUP.md) for the Slurm pipeline, [`scripts/bench_backends.py`](scripts/bench_backends.py) for the ~70× warm-call speedup from the persistent Lean LSP server, and the `--num-workers` / `--shard-dir` / `--time-budget` flags above for cluster-scale runs.
+
 Next Steps:
 - How can we make this faster?
 - How do we scale our solution to compute for 200k theorems? (see FinalDesignDoc.md for more details)
@@ -125,8 +156,4 @@ Next Steps:
 # Fun Fact
 
 This project is named "wiggle wiggle" as an alternate term for "perturbation", from a mysterious unnamed professor in the UW Math Department.
-
-# Credits
-- Vasily Ilin & Aristotle for the negate tactic
-- Theodore Meek for some mathlib dependency generalization inspiration
 

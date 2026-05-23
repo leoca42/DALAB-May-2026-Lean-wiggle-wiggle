@@ -1,13 +1,24 @@
 """
 Lean execution backend.
 
-Wraps ``lake env lean`` and the ``extract_goal`` trick used by the
-tactic-driven perturbations. Centralised here so that:
+Wraps Lean elaboration in a single function, ``run_lean(code) -> str``, that
+every higher-level Wiggle helper (``compile_lean``, ``extract_goal``,
+``src/typeclass_mutate._run_lean``) goes through.
 
-  1. There is one place to swap in a faster Lean server later (the docs/Final
-     Design Doc.md flags Lean elaboration as the main bottleneck).
-  2. Tests can monkeypatch ``run_lean`` to mock Lean output and avoid the 5–30s
-     compile cost for every unit test.
+Two backends are available, selected by the ``WIGGLE_LEAN_BACKEND`` env var:
+
+  * ``"server"`` (default) — keep one persistent ``lake env lean --server``
+    process alive and reuse it via LSP. Amortises Mathlib's ~13s import cost
+    across an arbitrary number of calls. See :mod:`wiggle.lean_server`.
+  * ``"subprocess"`` — spawn a fresh ``lake env lean <file>`` per call. The
+    original behaviour; kept for debugging and as an automatic fallback when
+    the LSP server fails to start or crashes mid-call.
+
+The string returned by ``run_lean`` is the same shape regardless of backend:
+each diagnostic on its own block, prefixed by ``error:`` / ``warning:`` /
+``info:`` followed by a newline and the message body. Existing parsers
+(``compile_lean`` looks for the ``error:`` substring; ``extract_goal`` uses
+a multi-line ``^theorem`` regex) work identically against either backend.
 """
 
 from __future__ import annotations
@@ -44,15 +55,55 @@ def get_project_root() -> Path:
     )
 
 
-def run_lean(code: str, timeout: int = 300) -> str:
-    """Run ``lake env lean`` on the given source and return combined stdout+stderr.
+def _current_backend() -> str:
+    """Read ``WIGGLE_LEAN_BACKEND`` each call so tests can flip it at runtime."""
+    return os.environ.get("WIGGLE_LEAN_BACKEND", "server").lower()
 
-    Each call writes to a unique temp file under the project root so concurrent
+
+def run_lean(code: str, timeout: int = 300) -> str:
+    """Elaborate ``code`` with Lean and return diagnostics as a string.
+
+    Backend selection:
+
+      * If ``WIGGLE_LEAN_BACKEND`` is ``"subprocess"``, always use the
+        one-shot ``lake env lean <file>`` path.
+      * Otherwise (``"server"`` or unset), try the persistent LSP server.
+        On crash we restart it once and retry; if that also fails we fall
+        through to the subprocess backend so the pipeline never hard-stops
+        on a transient server issue.
+    """
+    if _current_backend() == "subprocess":
+        return _run_lean_subprocess(code, timeout)
+
+    # Imported lazily so that environments without the LSP module (or where
+    # `lake env lean --server` is missing) can still use the subprocess path.
+    from wiggle.lean_server import LeanServerCrash, get_server, reset_server
+
+    try:
+        srv = get_server()
+        if srv is not None:
+            return srv.run(code, timeout=float(timeout))
+    except LeanServerCrash:
+        reset_server()
+        try:
+            srv = get_server()
+            if srv is not None:
+                return srv.run(code, timeout=float(timeout))
+        except LeanServerCrash:
+            pass
+
+    # Either the server never started or both attempts crashed. Subprocess
+    # is the slow-but-correct safety net.
+    return _run_lean_subprocess(code, timeout)
+
+
+def _run_lean_subprocess(code: str, timeout: int) -> str:
+    """One-shot ``lake env lean <file>`` backend.
+
+    Each call writes a unique temp file under the project root so concurrent
     callers don't clobber each other. The file is removed on the way out.
     """
     project_root = get_project_root()
-    # NamedTemporaryFile with delete=False so subprocess can read it after we
-    # close the handle. We remove it explicitly in the finally clause.
     fd, path = tempfile.mkstemp(
         prefix="_wiggle_", suffix=".lean", dir=project_root
     )

@@ -37,7 +37,6 @@ from __future__ import annotations
 import os
 import re
 import subprocess
-import tempfile
 import urllib.request
 from functools import lru_cache
 from html.parser import HTMLParser
@@ -52,25 +51,25 @@ MATHLIB_DOCS_BASE = "https://leanprover-community.github.io/mathlib4_docs"
 
 
 def _run_lean(code: str, timeout: int = 120) -> str:
-    with tempfile.NamedTemporaryFile(
-        "w", suffix=".lean", dir=PROJECT_DIR, delete=False, encoding="utf-8"
-    ) as f:
-        f.write(code)
-        tmp = f.name
+    """Elaborate ``code`` via the shared ``wiggle.lean_runner.run_lean`` router.
+
+    Delegating here means the persistent Lean LSP server set up in
+    :mod:`wiggle.lean_server` also speeds up every typeclass-mutation
+    validity check. Falls back transparently to the subprocess backend when
+    the server is unavailable (controlled by ``WIGGLE_LEAN_BACKEND``).
+    """
+    # Local import keeps this module standalone-importable (the legacy
+    # callers in scripts/ don't always set up sys.path the same way).
+    import sys
+    _src = os.path.dirname(os.path.abspath(__file__))
+    if _src not in sys.path:
+        sys.path.insert(0, _src)
+    from wiggle.lean_runner import run_lean as _run_lean_via_runner
+
     try:
-        r = subprocess.run(
-            ["lake", "env", "lean", tmp],
-            cwd=PROJECT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-        return r.stdout + r.stderr
+        return _run_lean_via_runner(code, timeout=timeout)
     except subprocess.TimeoutExpired:
         return "timeout"
-    finally:
-        if os.path.exists(tmp):
-            os.remove(tmp)
 
 
 # ---------------------------------------------------------------------------

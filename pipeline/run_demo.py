@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +30,21 @@ PROJECT_ROOT = _HERE.parent
 while PROJECT_ROOT != PROJECT_ROOT.parent and not (PROJECT_ROOT / "Wiggle.lean").exists():
     PROJECT_ROOT = PROJECT_ROOT.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+
+# ── Backend selection: must run BEFORE importing wiggle ──────────────────────-
+# We sniff the argv early so the env var is in place by the time
+# ``wiggle.lean_runner`` first inspects it. ``argparse`` runs a second pass
+# in ``main()`` with a complete spec; this pre-pass is intentionally narrow.
+def _early_set_backend() -> None:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--backend", choices=("server", "subprocess"))
+    known, _ = parser.parse_known_args()
+    if known.backend is not None:
+        os.environ["WIGGLE_LEAN_BACKEND"] = known.backend
+
+
+_early_set_backend()
 
 from wiggle.chains import apply_chain, normalize_statement  # noqa: E402
 from wiggle.registry import PERTURBATIONS  # noqa: E402
@@ -189,12 +205,26 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Skip chained perturbations (faster for sanity tests).",
     )
+    parser.add_argument(
+        "--backend",
+        choices=("server", "subprocess"),
+        default=os.environ.get("WIGGLE_LEAN_BACKEND", "server"),
+        help=(
+            "Lean execution backend. 'server' (default) reuses one persistent "
+            "lake env lean --server process across calls; 'subprocess' spawns "
+            "a fresh lean per call (slower, kept for debugging)."
+        ),
+    )
     args = parser.parse_args(argv)
+    # _early_set_backend has already exported this; re-export so subprocesses
+    # (e.g. lake env) inherit the same value.
+    os.environ["WIGGLE_LEAN_BACKEND"] = args.backend
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"Project root : {PROJECT_ROOT}")
     print(f"Output file  : {args.output}")
+    print(f"Backend      : {args.backend}")
     print(f"Theorems     : {len(TOY_THEOREMS)}")
     print(f"Perturbations: {len(PERTURBATIONS)} ({', '.join(p.name for p in PERTURBATIONS)})")
     if not args.singles_only:

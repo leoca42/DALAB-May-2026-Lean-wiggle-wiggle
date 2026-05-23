@@ -30,6 +30,8 @@ from wiggle.propagation import compose_truth, is_true
 from wiggle.chains import apply_chain, normalize_statement, parse_extracted_lean
 from wiggle.pipeline import run_pipeline
 from wiggle.lean_runner import compile_lean, extract_goal, get_project_root
+from wiggle.parallel import parse_duration, run_parallel
+from wiggle.shards import ShardWriter, iter_shard_records, scan_completed_anchors
 
 __all__ = [
     "PERTURBATIONS",
@@ -45,4 +47,9 @@ __all__ = [
     "compile_lean",
     "extract_goal",
     "get_project_root",
+    "run_parallel",
+    "parse_duration",
+    "ShardWriter",
+    "scan_completed_anchors",
+    "iter_shard_records",
 ]
