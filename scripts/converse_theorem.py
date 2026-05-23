@@ -2,7 +2,7 @@ import subprocess
 import os
 import re
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 LEAN_CODE = """\
 import Wiggle

@@ -30,7 +30,8 @@ from html.parser import HTMLParser
 # Project helpers
 # ---------------------------------------------------------------------------
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+# PROJECT_DIR is the Lake project root (one level up from src/).
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MATHLIB_DOCS_BASE = "https://leanprover-community.github.io/mathlib4_docs"
 
 

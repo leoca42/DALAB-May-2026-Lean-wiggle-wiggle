@@ -2,7 +2,9 @@ import argparse
 import os
 import subprocess
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+# PROJECT_DIR is the Lake project root (two levels up from src/instance_graph/).
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DEFAULT_OUTPUT = os.path.join(PROJECT_DIR, "data", "mathlib_instances.jsonl")
 
 
 def dump_instances(output_path: str, timeout: int) -> None:
@@ -35,9 +37,10 @@ def dump_instances(output_path: str, timeout: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Dump registered Lean/Mathlib instances as JSONL.")
-    parser.add_argument("--output", default="mathlib_instances.jsonl")
+    parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument("--timeout", type=int, default=600)
     args = parser.parse_args()
+    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     dump_instances(args.output, args.timeout)
 
 

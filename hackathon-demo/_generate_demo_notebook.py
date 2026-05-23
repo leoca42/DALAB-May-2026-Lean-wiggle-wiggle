@@ -40,15 +40,21 @@ from pathlib import Path
 from datetime import datetime, timezone
 from collections import Counter
 
-# Project root — absolute so the notebook works from any CWD
-PROJECT_DIR = Path(__file__).parent if "__file__" in dir() else Path.cwd()
-if not (PROJECT_DIR / "Wiggle.lean").exists():
-    PROJECT_DIR = Path("/Users/dqxiang/Projects/Math_AI_Lab/DALAB-May-2026-Lean-wiggle-wiggle")
+# Walk up from the current working directory until we find Wiggle.lean (the
+# Lake project root). This keeps the notebook portable across machines.
+NOTEBOOK_DIR = Path.cwd()
+PROJECT_DIR = NOTEBOOK_DIR
+while PROJECT_DIR != PROJECT_DIR.parent and not (PROJECT_DIR / "Wiggle.lean").exists():
+    PROJECT_DIR = PROJECT_DIR.parent
 
-OUTPUT_FILE = PROJECT_DIR / "demo_perturbations.jsonl"
-sys.path.insert(0, str(PROJECT_DIR))
+DEMO_DIR    = PROJECT_DIR / "hackathon-demo"
+OUTPUT_FILE = DEMO_DIR / "demo_perturbations.jsonl"
+
+# Put src/ on the path so we can `import typeclass_mutate, bounds`.
+sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 print(f"Project root : {PROJECT_DIR}")
+print(f"Demo dir     : {DEMO_DIR}")
 print(f"Output file  : {OUTPUT_FILE}")
 print(f"Lean project : {'OK' if (PROJECT_DIR / 'Wiggle.lean').exists() else 'NOT FOUND'}")"""
 

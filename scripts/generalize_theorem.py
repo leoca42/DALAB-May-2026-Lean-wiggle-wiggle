@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXTRACTED_THEOREM_RE = re.compile(r"^theorem .*extracted.*$", re.MULTILINE)
 
 

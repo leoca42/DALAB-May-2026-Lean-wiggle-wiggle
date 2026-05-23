@@ -1,7 +1,15 @@
 /.lake
 __pycache__/
 *.pyc
-typeclass_implications.jsonl
-lean_synth_checks/
-mathlib_instances.jsonl
-instance_implications.jsonl
+
+# Large machine-generated dumps live in data/ — regenerable via src/instance_graph/*.
+data/mathlib_instances.jsonl
+data/instance_implications.jsonl
+data/typeclass_implications.jsonl
+data/lean_synth_checks/
+
+# Stray tmp files created by the Lean runner (cleanup is normally automatic,
+# but a killed run can leave them behind).
+_demo_tmp.lean
+_tmp_nb.lean
+_*_tmp.lean

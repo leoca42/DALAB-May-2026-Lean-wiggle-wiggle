@@ -9,11 +9,12 @@ import tempfile
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+# PROJECT_DIR is the Lake project root (two levels up from src/instance_graph/).
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DEFAULT_DATASET = "mathlib-initiative/mathlib-types"
-DEFAULT_OUTPUT = "typeclass_implications.jsonl"
-DEFAULT_LEAN_CHECK_DIR = "lean_synth_checks"
+DEFAULT_OUTPUT = os.path.join(PROJECT_DIR, "data", "typeclass_implications.jsonl")
+DEFAULT_LEAN_CHECK_DIR = os.path.join(PROJECT_DIR, "data", "lean_synth_checks")
 
 BRACKET_RE = re.compile(r"\[([^\[\]]+)\]")
 FORALL_BINDER_RE = re.compile(r"[\{\(]\s*([^:\{\}\(\)\[\]]+?)\s*:\s*([^\{\}\(\)\[\],]+?)\s*[\}\)]")
@@ -399,6 +400,7 @@ def main() -> None:
     rows = load_rows(args.dataset_path, args.limit)
     candidates = candidate_rows(rows)
     save_dir = args.lean_check_dir or None
+    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     edges = verified_edges(candidates, args.max_candidates, args.timeout, save_dir)
     count = write_jsonl(args.output, edges)
     print(f"Wrote {count} verified edges to {args.output}")

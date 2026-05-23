@@ -1,5 +1,33 @@
 # DALAB-May-2026-Lean-wiggle-wiggle
 
+## Repository layout
+
+```
+.                                        # Lake project root
+├── Wiggle.lean                          # Lean tactics (negate, contrapose, converse, etc.)
+├── lakefile.toml, lean-toolchain, ...   # Lake build config (must stay at root)
+│
+├── docs/                                # Design documents
+│   └── Final Design Doc.md              # End-to-end project design and goals
+│
+├── src/                                 # Python library — the importable core
+│   ├── bounds.py                        # Inequality / numeric bound perturbations
+│   ├── typeclass_mutate.py              # Typeclass hierarchy perturbations
+│   └── instance_graph/                  # Mathlib instance dump + dependency builder
+│
+├── scripts/                             # Per-tactic CLI demos and one-off utilities
+├── tests/                               # Manual / smoke tests
+├── hackathon-demo/                      # Frozen artifacts from the hackathon presentation
+├── pipeline/                            # In-progress scaling pipeline (HF dataset, parallel runner, ...)
+└── data/                                # Generated dumps (gitignored, regenerable from src/instance_graph/)
+```
+
+See each subdirectory's `README.md` for details. The hackathon demo lives in
+[`hackathon-demo/`](hackathon-demo/); the scaling roadmap is in
+[`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md).
+
+## What this project does
+
 We perturb Lean theorem statements to create similar but distinct statements. We do this using Lean tactics to perturb the Lean statements by:
 - Finding a negation
 - Finding a contrapositive

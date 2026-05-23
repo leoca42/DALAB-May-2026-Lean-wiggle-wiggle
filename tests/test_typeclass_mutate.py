@@ -5,7 +5,11 @@ Quick test of the four typeclass perturbation methods on a simple theorem.
 """
 
 import sys
-sys.path.insert(0, ".")
+from pathlib import Path
+
+# Put the project's src/ on the path so we can import the wiggle library.
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from typeclass_mutate import (
     generalize_statement_by_weakening_hypotheses,

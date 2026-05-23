@@ -13,7 +13,9 @@ provability, so the original True labels are incorrect.
 import json
 from pathlib import Path
 
-JSONL_PATH = Path(__file__).parent / "demo_perturbations.jsonl"
+# demo_perturbations.jsonl lives in hackathon-demo/ relative to project root.
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+JSONL_PATH = PROJECT_DIR / "hackathon-demo" / "demo_perturbations.jsonl"
 
 
 def fix(path: Path) -> None:

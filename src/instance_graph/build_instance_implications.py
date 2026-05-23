@@ -1,10 +1,16 @@
 import argparse
 import json
+import os
 
 from typeclass_implication_table import BRACKET_RE
 from typeclass_implication_table import class_expr_from_bracket
 from typeclass_implication_table import head_symbol
 from typeclass_implication_table import return_expr
+
+# PROJECT_DIR is the Lake project root (two levels up from src/instance_graph/).
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DEFAULT_INSTANCES = os.path.join(PROJECT_DIR, "data", "mathlib_instances.jsonl")
+DEFAULT_OUTPUT = os.path.join(PROJECT_DIR, "data", "instance_implications.jsonl")
 
 
 def instance_edges(instance_path: str, direct_only: bool):
@@ -71,8 +77,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build implication edges from Lean's registered instance dump."
     )
-    parser.add_argument("--instances", default="mathlib_instances.jsonl")
-    parser.add_argument("--output", default="instance_implications.jsonl")
+    parser.add_argument("--instances", default=DEFAULT_INSTANCES)
+    parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument(
         "--direct-only",
         action="store_true",
@@ -80,6 +86,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     count = write_jsonl(args.output, instance_edges(args.instances, args.direct_only))
     print(f"Wrote {count} instance implication edges to {args.output}")
 

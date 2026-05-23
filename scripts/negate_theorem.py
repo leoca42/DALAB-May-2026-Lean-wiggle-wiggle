@@ -3,7 +3,7 @@ import os  # Provides filesystem path helpers and file cleanup checks.
 import re  # Lets the script search the Lean output with a regex.
 import tempfile  # Imported for temporary-file utilities, though not used below.
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # Absolute path to this project directory.
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Lake project root (one level up from scripts/).
 
 LEAN_CODE = """\
 import Wiggle
