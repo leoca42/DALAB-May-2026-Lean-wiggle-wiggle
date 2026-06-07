@@ -23,7 +23,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Literal
 
-from wiggle.transforms import bounds, connectives, logical, quantifiers, typeclass
+from wiggle.transforms import (
+    bounds,
+    connectives,
+    logical,
+    quantifiers,
+    relations,
+    structure,
+    typeclass,
+)
 
 __all__ = [
     "Perturbation",
@@ -63,7 +71,10 @@ class Perturbation:
     description: str
     """One-line human description."""
 
-    layer: Literal["logical", "connective", "quantifier", "typeclass", "bounds"]
+    layer: Literal[
+        "logical", "connective", "quantifier", "typeclass", "bounds",
+        "structure", "relation",
+    ]
     """Family of the perturbation, for grouping in reports."""
 
 
@@ -173,6 +184,118 @@ PERTURBATIONS: list[Perturbation] = [
         propagation={"true": "unknown", "false": "false", "unknown": "unknown"},
         description="Tighten numeric bound by ±1 in the tighter direction. Unknown.",
         layer="bounds",
+    ),
+    # ── Layer 6: structural rewrites (equivalence-preserving positives) ───────
+    Perturbation(
+        name="alpha_rename",
+        fn=structure.alpha_rename,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description="Rename every bound variable to a fresh name. Equivalent.",
+        layer="structure",
+    ),
+    Perturbation(
+        name="premise_permute",
+        fn=structure.premise_permute,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description="Swap the first two hypotheses (P → Q → R ↦ Q → P → R). Equivalent.",
+        layer="structure",
+    ),
+    Perturbation(
+        name="implicit_explicit_toggle",
+        fn=structure.implicit_explicit_toggle,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description="Flip the first {x : T} binder to (x : T) or vice versa. Equivalent.",
+        layer="structure",
+    ),
+    Perturbation(
+        name="curry",
+        fn=connectives.curry,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description="Rewrite (P ∧ Q) → R as P → Q → R via and_imp. Equivalent.",
+        layer="connective",
+    ),
+    Perturbation(
+        name="uncurry",
+        fn=connectives.uncurry,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description="Rewrite P → Q → R as (P ∧ Q) → R via ← and_imp. Equivalent.",
+        layer="connective",
+    ),
+    Perturbation(
+        name="definitional_unfold",
+        fn=connectives.definitional_unfold,
+        propagation={"true": "true", "false": "false", "unknown": "unknown"},
+        description=(
+            "Unfold a common predicate to its definition (e.g. Function.Injective "
+            "f → ∀ a b, f a = f b → a = b). Equivalent."
+        ),
+        layer="connective",
+    ),
+    # ── Layer 7: relation / operator mutations (graded hard negatives) ────────
+    Perturbation(
+        name="strictness_swap",
+        fn=relations.strictness_swap,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Swap strict ↔ non-strict on the first inequality (< ↔ ≤). Unknown.",
+        layer="relation",
+    ),
+    Perturbation(
+        name="eq_to_le",
+        fn=relations.eq_to_le,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Weaken the first equality a = b to a ≤ b. Unknown.",
+        layer="relation",
+    ),
+    Perturbation(
+        name="connective_swap",
+        fn=relations.connective_swap,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Swap the first ∧ ↔ ∨. Unknown.",
+        layer="relation",
+    ),
+    Perturbation(
+        name="arith_op_swap",
+        fn=relations.arith_op_swap,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Swap the first arithmetic operator (+ / - / *). Unknown.",
+        layer="relation",
+    ),
+    Perturbation(
+        name="const_to_zero_one",
+        fn=relations.const_to_zero_one,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Mutate the first numeric literal (0 → 1, else → 0). Unknown.",
+        layer="relation",
+    ),
+    # ── Layer 3 (extended): quantifier-kind flips ─────────────────────────────
+    Perturbation(
+        name="forall_to_exists",
+        fn=quantifiers.forall_to_exists,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Weaken leading ∀ (x …) to ∃ (x …). Unknown.",
+        layer="quantifier",
+    ),
+    Perturbation(
+        name="exists_to_forall",
+        fn=quantifiers.exists_to_forall,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Strengthen leading ∃ x to ∀ x. Unknown.",
+        layer="quantifier",
+    ),
+    # ── Layer 4 (extended): type specialization + sibling swap ────────────────
+    Perturbation(
+        name="specialize_type",
+        fn=typeclass.specialize_type,
+        propagation={"true": "true", "false": "unknown", "unknown": "unknown"},
+        description="Instantiate the first type variable with a concrete type (ℤ/ℝ/…). True.",
+        layer="typeclass",
+    ),
+    Perturbation(
+        name="tc_sibling_swap",
+        fn=typeclass.tc_sibling_swap,
+        propagation={"true": "unknown", "false": "unknown", "unknown": "unknown"},
+        description="Replace a typeclass with an incomparable sibling. Unknown.",
+        layer="typeclass",
     ),
 ]
 

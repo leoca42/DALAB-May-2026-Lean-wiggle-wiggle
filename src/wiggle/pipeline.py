@@ -21,9 +21,9 @@ Outputs:
 from __future__ import annotations
 
 import json
+import math
 import random
 from datetime import datetime, timezone
-from itertools import permutations
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
@@ -32,6 +32,33 @@ from wiggle.propagation import is_true
 from wiggle.registry import TRANSFORMS
 
 __all__ = ["run_pipeline", "write_jsonl"]
+
+
+def _sample_orderings(
+    names: list[str], k: int, rng: random.Random
+) -> list[tuple[str, ...]]:
+    """Return up to ``k`` distinct random orderings of ``names``.
+
+    Generates orderings by shuffling rather than materializing every
+    permutation — ``len(names)!`` is astronomically large for the full
+    registry (28! ≈ 3e29), so the previous ``list(permutations(...))`` was a
+    latent OOM. Distinctness is enforced with a bounded retry budget; when ``k``
+    approaches the total number of orderings (tiny registries) we simply return
+    as many distinct ones as we find.
+    """
+    seen: set[tuple[str, ...]] = set()
+    out: list[tuple[str, ...]] = []
+    max_attempts = k * 20 + 100
+    for _ in range(max_attempts):
+        if len(out) >= k:
+            break
+        shuffled = names[:]
+        rng.shuffle(shuffled)
+        t = tuple(shuffled)
+        if t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
 
 
 def run_pipeline(
@@ -67,14 +94,14 @@ def run_pipeline(
     """
     transforms = transforms or TRANSFORMS
     transform_names = list(transforms.keys())
-    all_permutations = list(permutations(transform_names))
+    total_orderings = math.factorial(len(transform_names))
     rng = random.Random(random_seed)
 
     for anchor_idx, anchor in enumerate(anchors):
         anchor_sig = anchor.get("signature") or anchor.get("id", "")
         anchor_type = anchor["type"]
-        k = min(n_permutations, len(all_permutations))
-        sampled = rng.sample(all_permutations, k)
+        k = min(n_permutations, total_orderings)
+        sampled = _sample_orderings(transform_names, k, rng)
 
         if verbose:
             print(f"  [{anchor_idx}] {anchor_sig}: {k} permutations", flush=True)

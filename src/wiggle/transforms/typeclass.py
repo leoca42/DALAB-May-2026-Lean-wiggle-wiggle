@@ -17,6 +17,8 @@ Names describe what happens to the TYPECLASS at that position; see
 from __future__ import annotations
 
 from typeclass_mutate import (
+    sibling_typeclass,
+    specialize_type as _specialize_type_impl,
     strengthen_conclusion_typeclass,
     strengthen_hypothesis_typeclass,
     weaken_conclusion_typeclass,
@@ -28,6 +30,8 @@ __all__ = [
     "tc_strengthen_hyp",
     "tc_strengthen_conc",
     "tc_weaken_conc",
+    "tc_sibling_swap",
+    "specialize_type",
 ]
 
 
@@ -62,3 +66,13 @@ def tc_strengthen_conc(sig: str, type_str: str) -> tuple[str, str] | None:
 def tc_weaken_conc(sig: str, type_str: str) -> tuple[str, str] | None:
     """Replace a conclusion typeclass with a WEAKER parent class."""
     return _wrap(weaken_conclusion_typeclass, sig, type_str)
+
+
+def tc_sibling_swap(sig: str, type_str: str) -> tuple[str, str] | None:
+    """Replace a typeclass with an incomparable SIBLING (shares a parent)."""
+    return _wrap(sibling_typeclass, sig, type_str)
+
+
+def specialize_type(sig: str, type_str: str) -> tuple[str, str] | None:
+    """Instantiate the first type variable with a concrete type (ℕ/ℤ/ℚ/ℝ/ℂ)."""
+    return _wrap(_specialize_type_impl, sig, type_str)

@@ -25,13 +25,19 @@ EXPECTED_NAMES = {
     # Logical
     "negate", "contrapose", "converse", "inverse", "drop_unused_hyp",
     # Connectives
-    "de_morgan_rewrite",
+    "de_morgan_rewrite", "curry", "uncurry", "definitional_unfold",
     # Quantifiers
-    "quantifier_swap",
+    "quantifier_swap", "forall_to_exists", "exists_to_forall",
     # Typeclass
     "tc_weaken_hyp", "tc_strengthen_hyp", "tc_strengthen_conc", "tc_weaken_conc",
+    "tc_sibling_swap", "specialize_type",
     # Bounds
     "flip_bound", "bound_tighter",
+    # Structure
+    "alpha_rename", "premise_permute", "implicit_explicit_toggle",
+    # Relation
+    "strictness_swap", "eq_to_le", "connective_swap", "arith_op_swap",
+    "const_to_zero_one",
 }
 
 
@@ -56,7 +62,10 @@ def test_every_entry_has_total_propagation() -> None:
 
 
 def test_every_layer_is_valid() -> None:
-    valid_layers = {"logical", "connective", "quantifier", "typeclass", "bounds"}
+    valid_layers = {
+        "logical", "connective", "quantifier", "typeclass", "bounds",
+        "structure", "relation",
+    }
     for p in PERTURBATIONS:
         assert p.layer in valid_layers, f"{p.name} has unknown layer {p.layer!r}"
 

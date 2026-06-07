@@ -22,6 +22,10 @@ def jsonNatField (key : String) (value : Nat) : String :=
 def jsonObject (fields : List String) : String :=
   "{" ++ String.intercalate "," fields ++ "}"
 
+def jsonStrArrayField (key : String) (values : List String) : String :=
+  let items := values.map fun v => "\"" ++ jsonEscape v ++ "\""
+  "\"" ++ jsonEscape key ++ "\":[" ++ String.intercalate "," items ++ "]"
+
 open Lean Elab Command Meta in
 elab "#wiggle_dump_instances" : command => do
   let env ← getEnv
@@ -44,6 +48,28 @@ elab "#wiggle_dump_instances" : command => do
         jsonField "type" typeFmt.pretty,
         jsonNatField "priority" priority,
         jsonField "attrKind" attrKind
+      ]
+
+-- Dump the typeclass `extends` hierarchy for every class in the environment.
+-- For each class we emit its direct parent structures (the classes it extends),
+-- which is the "weakening" direction. The Python side reverses this to obtain
+-- children. This replaces the hand-maintained hierarchy in typeclass_mutate.py
+-- with a complete, Mathlib-version-accurate one.
+--
+-- `name` / `parents` are fully-qualified Lean names; the consumer derives short
+-- names by taking the last dotted component.
+open Lean Elab Command Meta in
+elab "#wiggle_dump_class_hierarchy" : command => do
+  let env ← getEnv
+  env.constants.forM fun name _info => do
+    if Lean.isClass env name then
+      let parents : List String :=
+        match Lean.getStructureInfo? env name with
+        | some info => (info.parentInfo.map (·.structName.toString)).toList
+        | none => []
+      IO.println <| jsonObject [
+        jsonField "name" (toString name),
+        jsonStrArrayField "parents" parents
       ]
 
 end Wiggle
@@ -142,6 +168,48 @@ macro "de_morgan_rewrite" : tactic => `(tactic|
   )
 )
 
+
+-- Curry: rewrite a conjunctive hypothesis `P ∧ Q → R` into `P → Q → R`.
+-- Equivalence-preserving. Fires only when an explicit `∧` sits in hypothesis
+-- position; otherwise `simp only` makes no progress and the macro fails (the
+-- Python wrapper then emits no record).
+open Lean.Elab.Tactic in
+macro "curry" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    revert_props
+    simp only [and_imp]
+    guard_goal_nums 1
+  )
+)
+
+-- Uncurry: rewrite `P → Q → R` into `(P ∧ Q) → R`. Equivalence-preserving.
+-- The common case for Mathlib statements (which are usually curried).
+open Lean.Elab.Tactic in
+macro "uncurry" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    revert_props
+    simp only [← and_imp]
+    guard_goal_nums 1
+  )
+)
+
+-- Definitional unfolding of common Mathlib predicates via `simp only [<def>]`.
+-- Equivalence-preserving: turns e.g. `Function.Injective f` into
+-- `∀ a b, f a = f b → a = b`, a syntactically very different but logically
+-- identical statement (a strong positive pair for embedder training). Fails
+-- (no record) when none of the listed predicates appear.
+open Lean.Elab.Tactic in
+macro "unfold_defs" : tactic => `(tactic|
+  (
+    guard_goal_nums 1
+    simp only [Function.Injective, Function.Surjective, Function.Bijective,
+               Function.LeftInverse, Function.RightInverse,
+               Monotone, Antitone, StrictMono, StrictAnti]
+    guard_goal_nums 1
+  )
+)
 
 -- Removes Prop-valued hypotheses that are not used by the target or by later
 -- hypotheses. This implements generalization by weakening hypotheses.

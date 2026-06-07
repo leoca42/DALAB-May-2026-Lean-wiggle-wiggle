@@ -172,10 +172,42 @@ def extract_goal(tactic: str, type_str: str) -> tuple[str, str] | None:
     m = _EXTRACTED_RE.search(output)
     if m is None:
         return None
-    full_statement = m.group(0)
-    without_proof = full_statement.rsplit(":= sorry", 1)[0].strip()
-    parts = without_proof.split(" : ", 1)
-    if len(parts) != 2:
+
+    # The extracted theorem may span multiple lines when the goal is large
+    # (e.g. after `unfold_defs`). Take everything from the `theorem …extracted`
+    # match up to the `:= sorry` terminator, then collapse whitespace so the
+    # rest of the pipeline sees a single-line statement. Matching only
+    # ``m.group(0)`` (one line) would silently truncate such statements.
+    tail = output[m.start():]
+    end = tail.find(":= sorry")
+    if end == -1:
+        end = tail.find(":=")
+    if end == -1:
         return None
-    variant_sig, variant_type = parts
-    return variant_sig.strip(), variant_type.strip()
+    block = " ".join(tail[:end].split())  # collapse newlines/runs of spaces
+
+    # Split `theorem <name> <binders> : <type>` at the first top-level colon
+    # (depth-aware, skipping `::`), so a `:` inside binders/type doesn't fool us.
+    depth = 0
+    i = 0
+    colon = -1
+    while i < len(block):
+        c = block[i]
+        if c in "([{":
+            depth += 1
+        elif c in ")]}":
+            depth = max(0, depth - 1)
+        elif c == ":" and depth == 0:
+            if i + 1 < len(block) and block[i + 1] == ":":
+                i += 2
+                continue
+            colon = i
+            break
+        i += 1
+    if colon == -1:
+        return None
+    variant_sig = block[:colon].strip()
+    variant_type = block[colon + 1:].strip()
+    if not variant_type:
+        return None
+    return variant_sig, variant_type

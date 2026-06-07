@@ -26,20 +26,22 @@ Four perturbation methods (named for what they do to the *typeclass*):
                                    Claims a weaker property; follows from
                                    the original by definition of the hierarchy.
 
-Hierarchy sources (in order of preference):
-  1. Lean metaprogramming – getParentStructures (for parents)
-  2. Mathlib4 HTML docs scrape (for children / subclasses)
-  3. Hardcoded fallback map for the most common Mathlib algebra classes
+Hierarchy source:
+  The full Mathlib `extends` hierarchy is precomputed once into
+  data/class_hierarchy.jsonl by `src/instance_graph/dump_class_hierarchy.py`
+  (which runs the `#wiggle_dump_class_hierarchy` command in Wiggle.lean). Both
+  parents and children are derived from that single table. Classes missing from
+  the dump fall back to a live Lean `getStructureInfo?` query for parents only.
+  Regenerate the dump after a Mathlib/Lean toolchain bump.
 """
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
-import urllib.request
 from functools import lru_cache
-from html.parser import HTMLParser
 
 # ---------------------------------------------------------------------------
 # Project helpers
@@ -47,7 +49,6 @@ from html.parser import HTMLParser
 
 # PROJECT_DIR is the Lake project root (one level up from src/).
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MATHLIB_DOCS_BASE = "https://leanprover-community.github.io/mathlib4_docs"
 
 
 def _run_lean(code: str, timeout: int = 120) -> str:
@@ -73,123 +74,75 @@ def _run_lean(code: str, timeout: int = 120) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Hardcoded fallback hierarchy (direct parent → children edges)
-# Used when docs scraping fails and for fast common-case lookups.
+# Data-driven typeclass hierarchy
+#
+# The hierarchy is loaded from data/class_hierarchy.jsonl, produced by
+#   python src/instance_graph/dump_class_hierarchy.py
+# which runs the `#wiggle_dump_class_hierarchy` command in Wiggle.lean over the
+# whole Mathlib environment. Each line is
+#   {"name": "<fully.qualified.Class>", "parents": ["<fully.qualified>", ...]}
+#
+# Everything is keyed by SHORT name (last dotted component), since that is how
+# typeclasses appear in theorem statements. Both Type-valued classes (CommRing,
+# AddCommMonoid, …) and Prop-valued classes (IsDomain, IsField, …) live in the
+# same table — there is no longer a separate hand-maintained Prop hierarchy.
+#
+# Set WIGGLE_CLASS_HIERARCHY to override the path (used by tests).
 # ---------------------------------------------------------------------------
 
-# Maps each typeclass to its known direct parents (weakening direction).
-_HARDCODED_PARENTS: dict[str, list[str]] = {
-    # ── Algebraic hierarchy (single type variable) ────────────────────────
-    "MulOneClass":          [],
-    "Monoid":               ["MulOneClass"],
-    "CommMonoid":           ["Monoid"],
-    "Group":                ["Monoid"],
-    "CommGroup":            ["CommMonoid", "Group"],
-    "AddMonoid":            [],
-    "AddCommMonoid":        ["AddMonoid"],
-    "AddGroup":             ["AddMonoid"],
-    "AddCommGroup":         ["AddCommMonoid", "AddGroup"],
-    "MulZeroClass":         [],
-    "NonUnitalNonAssocSemiring": ["AddCommMonoid", "MulZeroClass"],
-    "NonUnitalSemiring":    ["NonUnitalNonAssocSemiring"],
-    "NonAssocSemiring":     ["NonUnitalNonAssocSemiring"],
-    "Semiring":             ["NonUnitalSemiring", "NonAssocSemiring"],
-    "CommSemiring":         ["Semiring", "CommMonoid"],
-    "Ring":                 ["Semiring", "AddCommGroup"],
-    "CommRing":             ["Ring", "CommSemiring"],
-    "IsDomain":             ["CommRing"],
-    "EuclideanDomain":      ["IsDomain"],
-    "Field":                ["CommRing"],
-    "LinearOrderedField":   ["Field"],
-    # ── Order hierarchy ───────────────────────────────────────────────────
-    "Preorder":             [],
-    "PartialOrder":         ["Preorder"],
-    "LinearOrder":          ["PartialOrder"],
-    "Lattice":              ["PartialOrder"],
-    "DistribLattice":       ["Lattice"],
-    "LinearOrderedAddCommMonoid": ["AddCommMonoid", "LinearOrder"],
-    "LinearOrderedCommMonoid":    ["CommMonoid", "LinearOrder"],
-    "OrderedAddCommGroup":  ["AddCommGroup", "PartialOrder"],
-    "OrderedRing":          ["Ring", "OrderedAddCommGroup"],
-    "LinearOrderedRing":    ["OrderedRing", "LinearOrder"],
-    "LinearOrderedCommRing":["CommRing", "LinearOrderedRing"],
-    # ── Module / vector space ──────────────────────────────────────────────
-    "Module":               ["AddCommGroup"],
-    "Submodule":            [],
-    # ── Norm / metric ─────────────────────────────────────────────────────
-    "Norm":                 [],
-    "SeminormedAddCommGroup": ["AddCommGroup", "Norm"],
-    "NormedAddCommGroup":   ["SeminormedAddCommGroup"],
-    "SeminormedRing":       ["Ring", "SeminormedAddCommGroup"],
-    "NormedRing":           ["SeminormedRing", "NormedAddCommGroup"],
-    "NormedField":          ["Field", "NormedRing"],
-    # ── Topological ───────────────────────────────────────────────────────
-    "TopologicalSpace":     [],
-    "T0Space":              ["TopologicalSpace"],
-    "T1Space":              ["T0Space"],
-    "T2Space":              ["T1Space"],
-    "T3Space":              ["T2Space"],
-    "MetricSpace":          ["T2Space"],
-    "CompleteSpace":        ["MetricSpace"],
-    # ── Finiteness ────────────────────────────────────────────────────────
-    "Fintype":              [],
-    "Infinite":             [],
-    # ── Decidability ──────────────────────────────────────────────────────
-    "DecidableEq":          [],
-}
+_HIERARCHY_PATH = os.path.join(PROJECT_DIR, "data", "class_hierarchy.jsonl")
 
-# Reverse map: children[TC] = [subclasses that directly extend TC]
-_HARDCODED_CHILDREN: dict[str, list[str]] = {}
-for _child, _parents in _HARDCODED_PARENTS.items():
-    for _p in _parents:
-        _HARDCODED_CHILDREN.setdefault(_p, []).append(_child)
 
-# ---------------------------------------------------------------------------
-# Prop-valued typeclass hierarchy (used in theorem CONCLUSIONS)
-# These classes appear as bare applications `TC α` rather than `[TC α]` and
-# express structural properties as Propositions.
-# ---------------------------------------------------------------------------
+def _short_name(name: str) -> str:
+    """Last dotted component, e.g. ``Mathlib.Algebra.Field`` → ``Field``."""
+    return name.rsplit(".", 1)[-1]
 
-_PROP_TC_PARENTS: dict[str, list[str]] = {
-    # Domain / field chain
-    "IsField":              ["EuclideanDomain"],
-    "EuclideanDomain":      ["IsDomain"],
-    "IsDomain":             ["IsCancelMulZero", "Nontrivial"],
-    "IsCancelMulZero":      ["NoZeroDivisors"],
-    "NoZeroDivisors":       [],
-    "Nontrivial":           [],
-    # Commutativity / cancellation
-    "IsCancelMul":          ["IsLeftCancelMul", "IsRightCancelMul"],
-    "IsLeftCancelMul":      [],
-    "IsRightCancelMul":     [],
-    # Normality / simplicity
-    "IsSimpleGroup":        [],
-    "IsSimpleModule":       [],
-    # Algebraically closed
-    "IsAlgClosed":          [],
-    # Unit / invertible
-    "IsUnit":               [],
-    # Dedekind / Noetherian
-    "IsDedekindDomain":     ["IsNoetherian"],
-    "IsNoetherian":         [],
-    "IsPrincipalIdealRing": ["IsDedekindDomain"],
-    # Integral / prime
-    "Prime":                ["Irreducible"],
-    "Irreducible":          [],
-    "Associated":           [],
-    # Group properties
-    "IsAbelian":            [],
-    # Separable / perfect field
-    "IsSepClosed":          ["IsAlgClosed"],
-}
 
-_PROP_TC_CHILDREN: dict[str, list[str]] = {}
-for _child, _parents in _PROP_TC_PARENTS.items():
-    for _p in _parents:
-        _PROP_TC_CHILDREN.setdefault(_p, []).append(_child)
+@lru_cache(maxsize=1)
+def _load_hierarchy() -> tuple[dict[str, frozenset[str]], dict[str, frozenset[str]]]:
+    """Load ``(parents, children)`` short-name maps from the dump.
 
-# Combined set of all known typeclass names (for quick lookup)
-_ALL_KNOWN_TC: set[str] = set(_HARDCODED_PARENTS) | set(_PROP_TC_PARENTS)
+    Both dicts are keyed by short class name. Every class that appears in the
+    dump — and every class named as someone's parent — is present as a key in
+    ``parents`` (possibly mapping to the empty set), so ``name in parents`` is
+    a reliable "is this a known class?" test. ``children`` is the reverse edge.
+
+    A missing dump file yields two empty maps; callers then fall back to a live
+    Lean structure query for parents.
+    """
+    path = os.environ.get("WIGGLE_CLASS_HIERARCHY", _HIERARCHY_PATH)
+    parents: dict[str, set[str]] = {}
+    children: dict[str, set[str]] = {}
+    if not os.path.exists(path):
+        return {}, {}
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            child = _short_name(str(row.get("name", "")))
+            if not child:
+                continue
+            edge_parents = {_short_name(str(p)) for p in row.get("parents", []) if p}
+            edge_parents.discard(child)
+            parents.setdefault(child, set()).update(edge_parents)
+            for parent in edge_parents:
+                parents.setdefault(parent, set())  # parent is itself a known class
+                children.setdefault(parent, set()).add(child)
+    return (
+        {k: frozenset(v) for k, v in parents.items()},
+        {k: frozenset(v) for k, v in children.items()},
+    )
+
+
+def is_known_class(class_name: str) -> bool:
+    """True iff ``class_name`` (short or fully qualified) appears in the dump."""
+    parents, _ = _load_hierarchy()
+    return _short_name(class_name) in parents
 
 
 # ---------------------------------------------------------------------------
@@ -228,130 +181,36 @@ def get_class_parents_lean(class_name: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Getting children via Mathlib4 HTML docs scrape
-# ---------------------------------------------------------------------------
-
-class _ExtendsParser(HTMLParser):
-    """Collect identifiers from the 'extends' clause on a Mathlib4 docs page."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._in_decl = False
-        self._depth = 0
-        self._extends_text = ""
-        self._found: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list) -> None:
-        classes = dict(attrs).get("class", "") or ""
-        if "decl" in classes or "structure" in classes:
-            self._in_decl = True
-            self._depth = 0
-        if self._in_decl:
-            self._depth += 1
-
-    def handle_endtag(self, tag: str) -> None:
-        if self._in_decl:
-            self._depth -= 1
-            if self._depth <= 0:
-                self._in_decl = False
-
-    def handle_data(self, data: str) -> None:
-        if self._in_decl:
-            self._extends_text += data
-
-    def get_extends(self) -> list[str]:
-        text = self._extends_text
-        m = re.search(r'extends\s+(.*?)(?:\s*where|\s*:=|\Z)', text, re.DOTALL)
-        if not m:
-            return []
-        raw = m.group(1)
-        # Strip type args, keep class names (Capitalized identifiers)
-        return re.findall(r'\b([A-Z][A-Za-z0-9_]*)\b', raw)
-
-
-def _fetch_url(url: str, timeout: int = 10) -> str | None:
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.read().decode("utf-8", errors="replace")
-    except Exception:
-        return None
-
-
-@lru_cache(maxsize=256)
-def _find_class_doc_url(class_name: str) -> str | None:
-    """
-    Search Mathlib4 docs for the HTML page of `class_name`.
-    Returns the page URL or None.
-    """
-    search_url = f"{MATHLIB_DOCS_BASE}/find/?pattern={class_name}"
-    html = _fetch_url(search_url)
-    if not html:
-        return None
-    # Look for the first link matching /Mathlib/...html#ClassName
-    pattern = rf'href="([^"]*Mathlib[^"]*\.html#{re.escape(class_name)})"'
-    m = re.search(pattern, html)
-    if m:
-        href = m.group(1)
-        if href.startswith("http"):
-            return href
-        return MATHLIB_DOCS_BASE + "/" + href.lstrip("./")
-    return None
-
-
-@lru_cache(maxsize=256)
-def get_class_children_docs(class_name: str) -> list[str]:
-    """
-    Scrape the Mathlib4 docs page for `class_name` and return a list of
-    direct subclasses (classes that `extend` it).
-    """
-    url = _find_class_doc_url(class_name)
-    if not url:
-        return []
-    html = _fetch_url(url)
-    if not html:
-        return []
-    # Search for classes that extend class_name in this page
-    # Mathlib4 docs renders each declaration; look for 'extends ClassName' patterns
-    children: list[str] = []
-    # Pattern: class <Child> ... extends <class_name>
-    for m in re.finditer(
-        rf'class\s+([A-Z][A-Za-z0-9_]*)\b[^{{]*\bextends\b[^{{]*\b{re.escape(class_name)}\b',
-        html,
-    ):
-        name = m.group(1)
-        if name != class_name:
-            children.append(name)
-    return list(dict.fromkeys(children))  # deduplicate preserving order
-
-
-# ---------------------------------------------------------------------------
 # Public hierarchy API
 # ---------------------------------------------------------------------------
 
 def get_parents(class_name: str, use_lean: bool = True) -> list[str]:
     """
     Return direct parent classes of `class_name` (1 level up = more general).
-    Tries Lean first (if use_lean), falls back to hardcoded map.
+
+    Reads the precomputed hierarchy (data/class_hierarchy.jsonl). For classes
+    missing from the dump — e.g. a newer Mathlib than the dump was built
+    against — falls back to a live Lean structure query when ``use_lean``.
     """
-    if class_name in _HARDCODED_PARENTS:
-        return _HARDCODED_PARENTS[class_name]
+    parents, _ = _load_hierarchy()
+    short = _short_name(class_name)
+    if short in parents:
+        return sorted(parents[short])
     if use_lean:
-        lean_result = get_class_parents_lean(class_name)
-        if lean_result:
-            return lean_result
+        return get_class_parents_lean(class_name)
     return []
 
 
 def get_children(class_name: str) -> list[str]:
     """
     Return direct subclasses of `class_name` (1 level down = more specific).
-    Tries hardcoded map first, then docs scraping.
+
+    Children come from the reverse of the precomputed hierarchy. There is no
+    live fallback: Lean offers no cheap "who extends me" reverse lookup, so a
+    class absent from the dump simply has no known children.
     """
-    hardcoded = _HARDCODED_CHILDREN.get(class_name, [])
-    if hardcoded:
-        return hardcoded
-    return get_class_children_docs(class_name)
+    _, children = _load_hierarchy()
+    return sorted(children.get(_short_name(class_name), frozenset()))
 
 
 def get_ancestors(class_name: str, depth: int = 2) -> list[str]:
@@ -478,24 +337,18 @@ def _compile_lean(type_str: str) -> bool:
 
 def _find_prop_tc_in_text(text: str) -> list[tuple[str, int, int]]:
     """
-    Find bare Prop-valued typeclass applications in `text`.
-    Matches `TCName <args>` where TCName is a known Prop-TC.
+    Find bare typeclass applications in `text`, e.g. ``IsDomain (Polynomial R)``.
+    Matches `TCName <args>` where TCName is any class in the loaded hierarchy
+    (this includes Prop-valued classes such as IsDomain / IsField, which appear
+    unbracketed in conclusions).
     Returns list of (tc_name, start, end_of_name).
     """
     results = []
     for m in re.finditer(r'\b([A-Z][A-Za-z0-9_]*)\b', text):
         name = m.group(1)
-        if name in _PROP_TC_PARENTS:
+        if is_known_class(name):
             results.append((name, m.start(), m.end()))
     return results
-
-
-def _substitute_prop_tc(type_str: str, old_tc: str, new_tc: str) -> str:
-    """Replace first occurrence of bare Prop-TC `old_tc` with `new_tc` in the full string."""
-    m = re.search(r'\b' + re.escape(old_tc) + r'\b', type_str)
-    if not m:
-        return type_str
-    return type_str[: m.start()] + new_tc + type_str[m.end():]
 
 
 def _substitute_prop_tc_in_conclusion(
@@ -512,38 +365,6 @@ def _substitute_prop_tc_in_conclusion(
     abs_start = conclusion_offset + m.start()
     abs_end = conclusion_offset + m.end()
     return type_str[:abs_start] + new_tc + type_str[abs_end:]
-
-
-def _get_prop_tc_ancestors(tc_name: str, depth: int) -> list[str]:
-    visited: set[str] = set()
-    frontier = [tc_name]
-    result: list[str] = []
-    for _ in range(depth):
-        next_frontier: list[str] = []
-        for name in frontier:
-            for parent in _PROP_TC_PARENTS.get(name, []):
-                if parent not in visited and parent != tc_name:
-                    visited.add(parent)
-                    result.append(parent)
-                    next_frontier.append(parent)
-        frontier = next_frontier
-    return result
-
-
-def _get_prop_tc_descendants(tc_name: str, depth: int) -> list[str]:
-    visited: set[str] = set()
-    frontier = [tc_name]
-    result: list[str] = []
-    for _ in range(depth):
-        next_frontier: list[str] = []
-        for name in frontier:
-            for child in _PROP_TC_CHILDREN.get(name, []):
-                if child not in visited and child != tc_name:
-                    visited.add(child)
-                    result.append(child)
-                    next_frontier.append(child)
-        frontier = next_frontier
-    return result
 
 
 # ---------------------------------------------------------------------------
@@ -634,7 +455,7 @@ def strengthen_conclusion_typeclass(
 
     # Pass 2: bare Prop-valued typeclass applications in the conclusion
     for tc_name, _, _ in _find_prop_tc_in_text(conclusion):
-        for descendant in _get_prop_tc_descendants(tc_name, depth):
+        for descendant in get_descendants(tc_name, depth):
             new_type = _substitute_prop_tc_in_conclusion(
                 type_str, tc_name, descendant, conc_offset
             )
@@ -680,13 +501,144 @@ def weaken_conclusion_typeclass(
 
     # Pass 2: bare Prop-valued typeclass applications in the conclusion
     for tc_name, _, _ in _find_prop_tc_in_text(conclusion):
-        for ancestor in _get_prop_tc_ancestors(tc_name, depth):
+        for ancestor in get_ancestors(tc_name, depth):
             new_type = _substitute_prop_tc_in_conclusion(
                 type_str, tc_name, ancestor, conc_offset
             )
             if new_type != type_str and _compile_lean(new_type):
                 return sig, new_type
 
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Type specialization and sibling-class swap
+# ---------------------------------------------------------------------------
+
+# Concrete Mathlib types tried, in order, when instantiating a type variable.
+# The Lean compile check decides which one actually satisfies the constraints.
+_CONCRETE_TYPES = ["ℕ", "ℤ", "ℚ", "ℝ", "ℂ"]
+_VAR_EXTRA = r"'′₀-₉ₐ-ₜ"
+
+
+def _subst_var(text: str, var: str, repl: str) -> str:
+    """Boundary-aware replacement of identifier ``var`` (so ``α`` ≠ ``α₀``)."""
+    pat = rf"(?<![\w{_VAR_EXTRA}]){re.escape(var)}(?![\w{_VAR_EXTRA}])"
+    return re.sub(pat, repl, text)
+
+
+def _split_forall(type_str: str) -> tuple[str, str] | None:
+    """Split ``∀ <binders>, <body>``; None if not a leading-∀ statement."""
+    s = type_str.strip()
+    if not s.startswith("∀"):
+        return None
+    after = s[len("∀"):]
+    depth = 0
+    for i, c in enumerate(after):
+        if c in "({[⦃":
+            depth += 1
+        elif c in ")}]⦄":
+            depth = max(0, depth - 1)
+        elif c == "," and depth == 0:
+            return after[:i].strip(), after[i + 1:].strip()
+    return None
+
+
+def _binder_groups(binders: str) -> list[tuple[str, str, str]]:
+    """Tokenize a binder block into ``(open_char, inner, full_text)`` groups."""
+    closes = {"(": ")", "{": "}", "[": "]", "⦃": "⦄"}
+    groups: list[tuple[str, str, str]] = []
+    i, n = 0, len(binders)
+    while i < n:
+        c = binders[i]
+        if c in closes:
+            close = closes[c]
+            depth, j = 0, i
+            while j < n:
+                if binders[j] == c:
+                    depth += 1
+                elif binders[j] == close:
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            groups.append((c, binders[i + 1:j], binders[i:j + 1]))
+            i = j + 1
+        else:
+            i += 1
+    return groups
+
+
+def specialize_type(sig: str, type_str: str) -> tuple[str, str] | None:
+    """Instantiate the first type variable with a concrete type (ℕ/ℤ/ℚ/ℝ/ℂ).
+
+    Drops the ``{α : Type*}`` binder and any instance binders ``[… α]`` that
+    constrain it, substitutes ``α`` everywhere with the concrete type, and keeps
+    the first version that compiles. A true universal statement stays true under
+    instantiation at a valid type, so this is a true→true near-positive that is
+    orthogonal to the typeclass-hierarchy mutations.
+    """
+    parsed = _split_forall(type_str)
+    if parsed is None:
+        return None
+    binders, body = parsed
+    groups = _binder_groups(binders)
+
+    var: str | None = None
+    var_group_full = ""
+    for _oc, inner, full in groups:
+        colon = inner.find(":")
+        if colon == -1:
+            continue
+        names = inner[:colon].split()
+        bind_type = inner[colon + 1:].strip()
+        if len(names) == 1 and (bind_type.startswith("Type") or bind_type.startswith("Sort")):
+            var, var_group_full = names[0], full
+            break
+    if var is None:
+        return None
+
+    kept: list[str] = []
+    for oc, inner, full in groups:
+        if full == var_group_full:
+            continue
+        if oc == "[" and _subst_var(inner, var, "\x00") != inner:
+            continue  # instance constraint on the specialized variable
+        kept.append(full)
+
+    for concrete in _CONCRETE_TYPES:
+        new_binders = _subst_var(" ".join(kept), var, concrete).strip()
+        new_body = _subst_var(body, var, concrete)
+        new_type = f"∀ {new_binders}, {new_body}" if new_binders else new_body
+        if new_type.strip() == type_str.strip():
+            continue
+        if _compile_lean(new_type):
+            return sig, new_type
+    return None
+
+
+def sibling_typeclass(sig: str, type_str: str, max_tries: int = 8) -> tuple[str, str] | None:
+    """Replace a typeclass with an incomparable *sibling* (shares a parent).
+
+    E.g. a class sitting under ``Monoid`` swapped for another class under
+    ``Monoid``. Neither stronger nor weaker than the original, so truth is
+    unknown — a harder negative than the up/down hierarchy moves. Returns the
+    first sibling substitution that compiles.
+    """
+    for _full, _prefix, tc_name, _args, _start, _end in _find_tc_brackets(type_str):
+        siblings: list[str] = []
+        seen: set[str] = {tc_name}
+        for parent in get_parents(tc_name):
+            for child in get_children(parent):
+                if child not in seen:
+                    seen.add(child)
+                    siblings.append(child)
+        for sib in siblings[:max_tries]:
+            new_type = _substitute_tc(type_str, tc_name, sib)
+            if new_type == type_str:
+                continue
+            if _compile_lean(new_type):
+                return sig, new_type
     return None
 
 

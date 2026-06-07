@@ -12,7 +12,7 @@ import re
 
 from wiggle.lean_runner import compile_lean
 
-__all__ = ["quantifier_swap"]
+__all__ = ["quantifier_swap", "forall_to_exists", "exists_to_forall"]
 
 
 # ── Bracket-aware comma scanner ───────────────────────────────────────────────
@@ -89,3 +89,57 @@ def quantifier_swap(sig: str, type_str: str) -> tuple[str, str] | None:
         return None
 
     return sig, swapped
+
+
+# ── Quantifier-kind flips ──────────────────────────────────────────────────────
+# These only fire when the leading binder block is purely explicit ``(…)``: ∃
+# cannot bind implicit ``{…}`` or instance ``[…]`` arguments, so a statement
+# like ``∀ {α} (x : α), …`` is skipped to avoid producing invalid syntax.
+
+def _leading_quantifier(type_str: str, re_match) -> tuple[str, str] | None:
+    """Return ``(binders, body)`` for a leading ∀/∃, else None."""
+    q = re_match.match(type_str)
+    if q is None:
+        return None
+    comma = _find_top_level_comma(type_str, start=q.end())
+    if comma == -1:
+        return None
+    binders = type_str[q.end():comma].strip()
+    body = type_str[comma + 1:].strip()
+    if not binders or not body:
+        return None
+    return binders, body
+
+
+def forall_to_exists(sig: str, type_str: str) -> tuple[str, str] | None:
+    """Weaken a leading ``∀ (x …), body`` to ``∃ (x …), body``.
+
+    Truth becomes unknown (existence needs an inhabitant; the universal claim is
+    strictly stronger). Skips statements whose leading binders are implicit or
+    instance arguments, which ∃ cannot bind.
+    """
+    parsed = _leading_quantifier(type_str, _FORALL_RE)
+    if parsed is None:
+        return None
+    binders, body = parsed
+    if any(ch in binders for ch in "{[⦃"):
+        return None
+    candidate = f"∃ {binders}, {body}"
+    if candidate.strip() == type_str.strip() or not compile_lean(sig, candidate):
+        return None
+    return sig, candidate
+
+
+def exists_to_forall(sig: str, type_str: str) -> tuple[str, str] | None:
+    """Strengthen a leading ``∃ x, body`` to ``∀ x, body``.
+
+    Truth becomes unknown (the universal claim is strictly stronger).
+    """
+    parsed = _leading_quantifier(type_str, _EXISTS_RE)
+    if parsed is None:
+        return None
+    binders, body = parsed
+    candidate = f"∀ {binders}, {body}"
+    if candidate.strip() == type_str.strip() or not compile_lean(sig, candidate):
+        return None
+    return sig, candidate

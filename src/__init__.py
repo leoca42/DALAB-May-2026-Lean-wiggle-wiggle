@@ -6,6 +6,8 @@ Importable modules:
                           typeclass hierarchy, verified via Lean compilation.
 
 Subpackages:
-    instance_graph      - tools for dumping and analysing Mathlib's typeclass
-                          instance graph (used to extend the hierarchy at scale).
+    instance_graph      - dump_class_hierarchy.py: dumps Mathlib's `extends`
+                          hierarchy to data/class_hierarchy.jsonl, which
+                          typeclass_mutate reads. (Older instance-graph builders
+                          live in archive/.)
 """

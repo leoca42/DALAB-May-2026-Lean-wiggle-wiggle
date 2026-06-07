@@ -12,8 +12,10 @@
 │
 ├── src/                                 # Python library — the importable core
 │   ├── bounds.py                        # Inequality / numeric bound perturbations
-│   ├── typeclass_mutate.py              # Typeclass hierarchy perturbations
-│   ├── instance_graph/                  # Mathlib instance dump + dependency builder
+│   ├── typeclass_mutate.py              # Typeclass perturbations; hierarchy is read
+│   │                                    #   from data/class_hierarchy.jsonl (no hardcoding)
+│   ├── instance_graph/                  # dump_class_hierarchy.py → class_hierarchy.jsonl
+│   │                                    #   (older instance-dump tools live in archive/)
 │   └── wiggle/                          # Phase 2: clean perturbation package
 │       ├── lean_runner.py               # Single home for `lake env lean` invocations
 │       ├── registry.py                  # Canonical PERTURBATIONS list (single source of truth)
@@ -91,15 +93,24 @@ Key flags for [`pipeline/run_hf_corpus.py`](pipeline/run_hf_corpus.py):
 
 We perturb Lean theorem statements to create similar but distinct statements,
 using a mix of Lean tactics and Python text manipulation. The current registry
-exposes **13 perturbations** across 5 layers:
+exposes **28 perturbations** across 7 layers:
 
 | Layer | Perturbations |
 |---|---|
 | Logical (Lean tactic) | `negate`, `contrapose`, `converse`, `inverse`, `drop_unused_hyp` |
-| Connective rewriting (Lean tactic) | `de_morgan_rewrite` |
-| Quantifier scope (Python + Lean validity oracle) | `quantifier_swap` |
-| Typeclass mutation (Python + Lean validity oracle) | `tc_weaken_hyp`, `tc_strengthen_hyp`, `tc_strengthen_conc`, `tc_weaken_conc` |
+| Connective rewriting (Lean tactic) | `de_morgan_rewrite`, `curry`, `uncurry`, `definitional_unfold` |
+| Quantifier scope (Python + Lean validity oracle) | `quantifier_swap`, `forall_to_exists`, `exists_to_forall` |
+| Typeclass / type mutation (Python + Lean validity oracle) | `tc_weaken_hyp`, `tc_strengthen_hyp`, `tc_strengthen_conc`, `tc_weaken_conc`, `tc_sibling_swap`, `specialize_type` |
 | Bound mutation (regex) | `flip_bound`, `bound_tighter` |
+| Structural rewrite (Python + Lean validity oracle) | `alpha_rename`, `premise_permute`, `implicit_explicit_toggle` |
+| Relation / operator mutation (Python + Lean validity oracle) | `strictness_swap`, `eq_to_le`, `connective_swap`, `arith_op_swap`, `const_to_zero_one` |
+
+Equivalence-preserving perturbations (`contrapose`, `de_morgan_rewrite`, `curry`,
+`uncurry`, `definitional_unfold`, `alpha_rename`, `premise_permute`,
+`implicit_explicit_toggle`) produce *positive* pairs (same meaning, different
+surface syntax); the rest produce graded or hard-negative pairs. Three further
+perturbations (`dual_full`, `sub_formula_negate`, `notation_unfold`) are designed
+but deferred — they need dedicated Lean metaprogramming rather than text edits.
 
 All peturbed Lean statements are checked by the Lean compiler to be valid Lean statements. However, many of them are mathematically incorrect. This project does not care whether a statement is true or not, just whether or not it is a valid Lean statement.
 
