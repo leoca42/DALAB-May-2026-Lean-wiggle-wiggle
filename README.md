@@ -51,6 +51,7 @@ See each subdirectory's `README.md` for details:
 - [`tests/README.md`](tests/README.md) — how to run the fast vs. live test suites, mocking pattern, recipe for adding a new perturbation test.
 - [`scripts/README.md`](scripts/README.md) — per-tactic demos, benchmark, Slurm wrapper.
 - [`pipeline/README.md`](pipeline/README.md) — corpus runners and dataset format.
+- [`docs/perturbations.md`](docs/perturbations.md) — catalogue of all 28 perturbations: what each one does, its value, where it performs well, and its limitations.
 - [`docs/HYAK_SETUP.md`](docs/HYAK_SETUP.md) — end-to-end guide for running on UW Hyak (or any Slurm cluster): env bootstrap, dataset pre-download, submit/monitor, resume after walltime, sizing table.
 - [`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md) — overall scaling roadmap.
 
@@ -111,6 +112,9 @@ Equivalence-preserving perturbations (`contrapose`, `de_morgan_rewrite`, `curry`
 surface syntax); the rest produce graded or hard-negative pairs. Three further
 perturbations (`dual_full`, `sub_formula_negate`, `notation_unfold`) are designed
 but deferred — they need dedicated Lean metaprogramming rather than text edits.
+
+For a per-perturbation breakdown — mechanism, value, what it works well on, and
+its limitations — see [`docs/perturbations.md`](docs/perturbations.md).
 
 All peturbed Lean statements are checked by the Lean compiler to be valid Lean statements. However, many of them are mathematically incorrect. This project does not care whether a statement is true or not, just whether or not it is a valid Lean statement.
 

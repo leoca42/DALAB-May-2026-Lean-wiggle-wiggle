@@ -150,11 +150,19 @@ def extract_goal(tactic: str, type_str: str) -> tuple[str, str] | None:
     Returns ``(variant_sig, variant_type)`` if the goal extraction succeeded,
     otherwise ``None``.
 
+    ``pp.funBinderTypes`` is essential, not cosmetic. Without it Lean prints
+    ``∃ a b, a + b ≠ b + a``, dropping the binder types because they are
+    recoverable *from the surrounding proof context*. Lifted out into a
+    standalone ``example`` those types are no longer inferable and the
+    statement fails to elaborate — so every ``negate`` variant was silently
+    unusable. With the option on we get ``∃ (a : ℕ) (b : ℕ), …`` instead.
+
     The snippet shape:
 
         import Mathlib
         import Wiggle
 
+        set_option pp.funBinderTypes true in
         example : <type_str> := by
           <tactic>
           extract_goal
@@ -163,6 +171,7 @@ def extract_goal(tactic: str, type_str: str) -> tuple[str, str] | None:
     code = (
         "import Mathlib\n"
         "import Wiggle\n\n"
+        "set_option pp.funBinderTypes true in\n"
         f"example : {type_str} := by\n"
         f"  {tactic}\n"
         "  extract_goal\n"
