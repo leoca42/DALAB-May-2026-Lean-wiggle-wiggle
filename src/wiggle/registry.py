@@ -40,6 +40,10 @@ __all__ = [
     "PROPAGATION_RULES",
     "ANCHOR_TRUTH",
     "TruthValue",
+    "SemanticClass",
+    "SEMANTIC_CLASSES",
+    "SEMANTIC_DISTANCE",
+    "semantic_class",
 ]
 
 
@@ -307,6 +311,58 @@ TRANSFORMS: dict[str, TransformFn] = {p.name: p.fn for p in PERTURBATIONS}
 PROPAGATION_RULES: dict[str, dict[TruthValue, TruthValue]] = {
     p.name: p.propagation for p in PERTURBATIONS
 }
+
+
+# ── Semantic class, read off the propagation table ────────────────────────────
+# How logically far a variant is from its anchor. This is *derived*, not a
+# second hand-maintained list: the propagation table already draws every
+# distinction we need.
+#
+#   identity map          → the variant is interchangeable with the anchor
+#                           under every anchor truth value, i.e. equivalent.
+#   true↔false swap       → the variant contradicts the anchor.
+#   true↦true, false↦?    → truth survives but falsity does not, so the
+#                           variant is implied by the anchor without being
+#                           equivalent to it (a strictly weaker or more
+#                           special claim).
+#   anything else         → the anchor's truth tells us nothing.
+
+SemanticClass = Literal["equivalent", "entailed", "graded", "contradictory"]
+
+_IDENTITY = {"true": "true", "false": "false", "unknown": "unknown"}
+_SWAP = {"true": "false", "false": "true", "unknown": "unknown"}
+
+
+def semantic_class(name: str) -> SemanticClass:
+    """Classify how far a perturbation moves a statement logically."""
+    rules = PROPAGATION_RULES.get(name)
+    if rules is None:
+        return "graded"
+    if rules == _IDENTITY:
+        return "equivalent"
+    if rules == _SWAP:
+        return "contradictory"
+    if rules["true"] == "true":
+        return "entailed"
+    return "graded"
+
+
+SEMANTIC_CLASSES: dict[str, SemanticClass] = {
+    p.name: semantic_class(p.name) for p in PERTURBATIONS
+}
+
+SEMANTIC_DISTANCE: dict[SemanticClass, float] = {
+    "equivalent": 0.0,
+    "entailed": 0.34,
+    "graded": 0.67,
+    "contradictory": 1.0,
+}
+"""Ordinal logical distance, for plotting surface change against meaning change.
+
+The spacing is nominal — these are ranks, not measured quantities. What the
+axis has to support is the comparison "did the meaning move more or less than
+the surface form did", and for that only the order matters.
+"""
 
 
 # ── Internal consistency (catches typos at import time) ───────────────────────

@@ -31,11 +31,17 @@
 │
 │       ├── parallel.py                  #   ProcessPoolExecutor + drain + time-budget
 │       ├── shards.py                    #   atomic JSONL shards + resume scan
-│       └── run_logging.py               #   per-worker JSONL logs + heartbeat
+│       ├── run_logging.py               #   per-worker JSONL logs + heartbeat
+│       └── lexical.py                   #   non-neural similarity: what word matching sees
 │
 ├── pipeline/                            # CLI runners on top of src/wiggle/
 │   ├── run_demo.py                      # 10 curated theorems → JSONL (replaces demo.ipynb)
-│   └── run_hf_corpus.py                 # HuggingFace dataset slice → sharded JSONL
+│   ├── run_hf_corpus.py                 # HuggingFace dataset slice → sharded JSONL
+│   ├── run_benchmark_review.py          # benchmark-CSV anchors → audited depth-1 review
+│   ├── run_deep_chains.py               # one anchor → whole perturbation tree
+│   ├── sample_mathlib_anchors.py        # shape-diverse anchors sampled from Mathlib
+│   ├── verify_variants.py               # re-elaborate every variant standalone
+│   └── analyze_geometry.py              # where do the variants sit? (lexical geometry)
 │
 ├── scripts/                             # Per-tactic CLI demos, bench, and Slurm wrapper
 │   ├── bench_backends.py                # server vs subprocess wallclock comparison
@@ -52,10 +58,33 @@ See each subdirectory's `README.md` for details:
 - [`scripts/README.md`](scripts/README.md) — per-tactic demos, benchmark, Slurm wrapper.
 - [`pipeline/README.md`](pipeline/README.md) — corpus runners and dataset format.
 - [`docs/perturbations.md`](docs/perturbations.md) — catalogue of all 28 perturbations: what each one does, its value, where it performs well, and its limitations.
+- [`docs/difficulty-spectrum.md`](docs/difficulty-spectrum.md) — which perturbations a model should find hard, and why. Ranks all 28 by how much of the change is hidden from word matching (measured) and by how much knowledge is needed to get it right (predicted).
 - [`docs/HYAK_SETUP.md`](docs/HYAK_SETUP.md) — end-to-end guide for running on UW Hyak (or any Slurm cluster): env bootstrap, dataset pre-download, submit/monitor, resume after walltime, sizing table.
 - [`docs/Final Design Doc.md`](docs/Final%20Design%20Doc.md) — overall scaling roadmap.
 
 The hackathon demo lives in [`hackathon-demo/`](hackathon-demo/).
+
+## What the perturbations look like so far
+
+Measured over 287 Lean-verified variants of 24 Mathlib anchors, using purely
+lexical similarity — no model — so the numbers are the floor that word matching
+gets for free ([`analyze_geometry.py`](pipeline/analyze_geometry.py)):
+
+- Variants land **93% of the way** from "unrelated theorem" to "identical
+  string", and **99%** still retrieve their own anchor. Perturbing a statement
+  does not move it, which is the intended shape for hard negatives.
+- Where an equivalence-preserving rewrite actually rewrote something, the
+  *logically different* variant is the lexically closer one **87%** of the time.
+  Surface similarity is not just uninformative here, it is **anti-correlated**
+  with logical similarity.
+- The one-token logical edits (`strictness_swap`, `connective_swap`,
+  `const_to_zero_one`, `flip_bound`, …) sit at a surface change of ≈0.00 while
+  changing what the theorem says. Those are the pairs worth training on.
+- Chaining perturbations is what buys distance: at depth 3 the mean collapse
+  falls to 0.77, and some variants land as far out as an unrelated theorem.
+
+Full write-up in [`docs/difficulty-spectrum.md`](docs/difficulty-spectrum.md);
+generated reports and figures land in `<run>/geometry/`.
 
 ## Running
 
@@ -77,6 +106,27 @@ sbatch scripts/wiggle.sbatch
 
 # Run the Python unit tests (no Lean required, < 5s):
 python -m pytest tests/ --ignore=tests/test_typeclass_mutate.py
+```
+
+### Evaluating a run
+
+```bash
+# Audited depth-1 review over the benchmark CSV anchors:
+python pipeline/run_benchmark_review.py --source Mathlib --num-workers 4
+python pipeline/verify_variants.py --run data/benchmark-review
+
+# Grow the whole perturbation tree around a single theorem:
+python pipeline/run_deep_chains.py --anchor bench_000 --depth 3 --max-nodes 40
+
+# Sample shape-diverse anchors from Mathlib, to exercise the perturbations
+# the benchmark CSV never triggers:
+python pipeline/sample_mathlib_anchors.py --limit 24 --verify
+python pipeline/run_benchmark_review.py --anchors-file data/anchors/mathlib-24.jsonl \
+    --out data/mathlib-review
+
+# Where do the variants sit relative to their anchor? (no Lean, seconds)
+# Writes report.md + figures to <run>/geometry/.
+python pipeline/analyze_geometry.py --run data/mathlib-review
 ```
 
 Key flags for [`pipeline/run_hf_corpus.py`](pipeline/run_hf_corpus.py):

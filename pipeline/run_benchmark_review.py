@@ -430,8 +430,14 @@ def render_report(anchors: list[dict[str, Any]], use_lean: bool) -> str:
         add(f"### {idx}. `{a['declaration']}`")
         add("")
         add(f"- **Module** — `{a['module']}`")
-        add(f"- **CSV rows** — {', '.join(a['pair_ids'])} (sheet row"
-            f"{'s' if len(a['csv_rows']) > 1 else ''} {', '.join(str(r + 2) for r in a['csv_rows'])})")
+        if a["csv_rows"]:
+            add(f"- **CSV rows** — {', '.join(a['pair_ids'])} (sheet row"
+                f"{'s' if len(a['csv_rows']) > 1 else ''} "
+                f"{', '.join(str(r + 2) for r in a['csv_rows'])})")
+        else:
+            add(f"- **Source** — {', '.join(a['pair_ids'])}")
+        if a.get("shapes"):
+            add(f"- **Shapes** — {', '.join('`' + s + '`' for s in a['shapes'])}")
         if a["is_definition"]:
             add("- **Kind** — definition (conclusion is data/a type, not a proposition)")
         else:
@@ -529,9 +535,26 @@ def load_anchors(
     return anchors[:limit] if limit else anchors
 
 
+def load_anchors_file(path: Path) -> list[dict[str, Any]]:
+    """Read anchors from a JSONL file produced by ``sample_mathlib_anchors.py``.
+
+    An alternative to the benchmark CSV for runs that need anchor shapes the
+    CSV does not contain. The record layout is the same either way, so nothing
+    downstream has to care which source was used.
+    """
+    anchors = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            anchors.append(json.loads(line))
+    return anchors
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--csv", type=Path, default=DEFAULT_CSV)
+    ap.add_argument("--anchors-file", type=Path,
+                    help="JSONL of anchors to use instead of the benchmark CSV "
+                         "(see pipeline/sample_mathlib_anchors.py).")
     ap.add_argument(
         "--source",
         default="Mathlib",
@@ -550,10 +573,15 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    rows_filter = (
-        {int(x) for x in args.rows.split(",") if x.strip()} if args.rows else None
-    )
-    anchors = load_anchors(args.csv, args.source or None, rows_filter, args.limit)
+    if args.anchors_file:
+        anchors = load_anchors_file(args.anchors_file)
+        if args.limit:
+            anchors = anchors[: args.limit]
+    else:
+        rows_filter = (
+            {int(x) for x in args.rows.split(",") if x.strip()} if args.rows else None
+        )
+        anchors = load_anchors(args.csv, args.source or None, rows_filter, args.limit)
     if not anchors:
         print("No anchors matched.", file=sys.stderr)
         return 1
