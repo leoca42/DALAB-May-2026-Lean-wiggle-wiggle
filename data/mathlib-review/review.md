@@ -1,6 +1,6 @@
 # Perturbation review — benchmark anchors
 
-Generated 2026-08-03T08:18:45+00:00  
+Generated 2026-08-03T18:08:53+00:00  
 24 anchors × 28 perturbations, depth 1  
 Lean verification: **on**
 
@@ -26,7 +26,7 @@ from the propagation table, **not** proven.
 | `tc_weaken_conc` | typeclass | **0/24** | 22 | 2 | 0 | 0 | 6 |
 | `flip_bound` | bounds | **18/24** | 6 | 0 | 0 | 0 | 0 |
 | `bound_tighter` | bounds | **2/24** | 21 | 0 | 0 | 1 | 0 |
-| `alpha_rename` | structure | **13/24** | 0 | 11 | 0 | 0 | 24 |
+| `alpha_rename` | structure | **24/24** | 0 | 0 | 0 | 0 | 24 |
 | `premise_permute` | structure | **15/24** | 9 | 0 | 0 | 0 | 15 |
 | `implicit_explicit_toggle` | structure | **24/24** | 0 | 0 | 0 | 0 | 24 |
 | `curry` | connective | **0/24** | 0 | 0 | 24 | 0 | 24 |
@@ -42,7 +42,7 @@ from the propagation table, **not** proven.
 | `specialize_type` | typeclass | **19/24** | 4 | 1 | 0 | 0 | 28 |
 | `tc_sibling_swap` | typeclass | **11/24** | 10 | 3 | 0 | 0 | 101 |
 
-**287 variants produced** from 24 anchors.
+**298 variants produced** from 24 anchors.
 
 ---
 
@@ -55,7 +55,7 @@ from the propagation table, **not** proven.
 - **Shapes** — `arith_op`, `conj_hypothesis`, `disjunction`, `equality`, `implication`, `inequality`, `numeral`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 27 Lean calls, 180.0s
+- **Cost** — 27 Lean calls, 305.9s
 
 **Original signature (as it appears in the sheet):**
 
@@ -70,7 +70,7 @@ from the propagation table, **not** proven.
     (n : ℕ), 0 ≤ a * b ^ n) → a = 0 ∨ 0 < a ∧ 0 ≤ b
 ```
 
-#### Variants produced (14/28)
+#### Variants produced (15/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -116,6 +116,15 @@ Change: `Semiring` → `CommSemiring`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {γ : Type u_1} [inst : Semiring γ] [inst_1 : LinearOrder γ] {c d : γ} [PosMulStrictMono γ], (∀
+    (n : ℕ), 0 ≤ c * d ^ n) → c = 0 ∨ 0 < c ∧ 0 ≤ d
+```
+
+Change: `{R` → `{γ`; `R]` → `γ]`; `R] {a b` → `γ] {c d`; `R}` → `γ}`; `R],` → `γ],`; `a` → `c`; …and 4 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -197,7 +206,7 @@ Change: removed `{R : Type u_1} [inst : Semiring R] [inst_1 : LinearOrder R]`; `
 
 Change: `Semiring` → `CommMonoidWithZero`
 
-#### Did not fire (14)
+#### Did not fire (13)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -209,7 +218,6 @@ Change: `Semiring` → `CommMonoidWithZero`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
@@ -225,7 +233,7 @@ Change: `Semiring` → `CommMonoidWithZero`
 - **Shapes** — `conj_hypothesis`, `disjunction`, `equality`, `forall_then_exists`, `implication`, `numeral`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 51 Lean calls, 208.4s
+- **Cost** — 51 Lean calls, 343.2s
 
 **Original signature (as it appears in the sheet):**
 
@@ -242,7 +250,7 @@ Change: `Semiring` → `CommMonoidWithZero`
     w)
 ```
 
-#### Variants produced (8/28)
+#### Variants produced (9/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -276,6 +284,17 @@ Change: `M] [FiniteDimensional` → `M], ¬FiniteDimensional`; `M]` → `M ∨ �
 ```
 
 Change: `AddCommGroup` → `AddCommGroupWithOne`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {α : Type u_1} [inst : AddCommGroup α] [inst_1 : Module ℝ α] [FiniteDimensional ℝ α] (x :
+    QuadraticForm ℝ α), ∃ (w : Fin (Module.finrank ℝ α) → ℝ), (∀ (i : Fin (Module.finrank ℝ α)),
+    w i = -1 ∨ w i = 0 ∨ w i = 1) ∧ QuadraticMap.Equivalent x (QuadraticMap.weightedSumSquares ℝ
+    w)
+```
+
+Change: `{M` → `{α`; `M]` → `α]`; `M]` → `α]`; `M] (Q` → `α] (x`; `M),` → `α),`; `M)` → `α)`; …and 2 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -331,7 +350,7 @@ Change: `-1` → `-0`
 
 Change: removed `{M : Type u_1} [inst : AddCommGroup M] [inst_1 : Module ℝ M] [FiniteDimensional ℝ M]`; `M),` → `ℝ),`; `M)` → `ℝ)`; `M)),` → `ℝ)),`
 
-#### Did not fire (20)
+#### Did not fire (19)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -345,7 +364,6 @@ Change: removed `{M : Type u_1} [inst : AddCommGroup M] [inst_1 : Module ℝ M] 
 | `tc_weaken_conc` | rejected | 2 candidate(s) proposed, all rejected by the Lean type-checker |
 | `flip_bound` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `uncurry` | tactic failed | tactic 'uncurry' ran but extract_goal produced nothing |
@@ -365,7 +383,7 @@ Change: removed `{M : Type u_1} [inst : AddCommGroup M] [inst_1 : Module ℝ M] 
 - **Shapes** — `arith_op`, `disjunction`, `equality`, `implication`, `inequality`, `leading_explicit_forall`, `numeral`, `two_hypotheses`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 19 Lean calls, 178.6s
+- **Cost** — 19 Lean calls, 304.7s
 
 **Original signature (as it appears in the sheet):**
 
@@ -409,11 +427,10 @@ Change: `<` → `>`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ (wv0 : ℕ), 1 < wv0 → ∀ (x y : ℕ), x < wv0 → x ≠ 0 ∨ y ≠ 0 → wv0.digits (x + wv0 * y) = x ::
-    wv0.digits y
+∀ (k : ℕ), 1 < k → ∀ (x y : ℕ), x < k → x ≠ 0 ∨ y ≠ 0 → k.digits (x + k * y) = x :: k.digits y
 ```
 
-Change: `(b` → `(wv0`; `b` → `wv0`; `b` → `wv0`; `b.digits` → `wv0.digits`; `b` → `wv0`; `b.digits` → `wv0.digits`
+Change: `(b` → `(k`; `b` → `k`; `b` → `k`; `b.digits` → `k.digits`; `b` → `k`; `b.digits` → `k.digits`
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -516,7 +533,7 @@ Change: `∀` → `∃`
 - **Shapes** — `disjunction`, `forall_then_exists`, `implication`, `inequality`, `two_hypotheses`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 17 Lean calls, 177.9s
+- **Cost** — 17 Lean calls, 304.0s
 
 **Original signature (as it appears in the sheet):**
 
@@ -531,7 +548,7 @@ Change: `∀` → `∃`
     n → r (f (g m)) (f (g n))) ∨ ∀ (m n : ℕ), m < n → ¬r (f (g m)) (f (g n))
 ```
 
-#### Variants produced (10/28)
+#### Variants produced (11/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -578,6 +595,15 @@ Change: `[IsTrans` → `[IsPreorder`
 
 Change: `<` → `>`
 
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {ι : Type u_1} (h : ι → ι → Prop) [IsTrans ι h] (φ : ℕ → ι), ∃ (g : ℕ ↪o ℕ), (∀ (m n : ℕ), m <
+    n → h (φ (g m)) (φ (g n))) ∨ ∀ (m n : ℕ), m < n → ¬h (φ (g m)) (φ (g n))
+```
+
+Change: `{α` → `{ι`; `(r` → `(h`; `α` → `ι`; `α` → `ι`; `α r] (f` → `ι h] (φ`; `α),` → `ι),`; …and 4 more
+
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
 ```lean
@@ -623,7 +649,7 @@ Change: `∨` → `∧`
 
 Change: removed `{α : Type u_1}`; `α` → `ℕ`; `α` → `ℕ`; removed `[IsTrans α r]`; `α),` → `ℕ),`
 
-#### Did not fire (18)
+#### Did not fire (17)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -635,7 +661,6 @@ Change: removed `{α : Type u_1}`; `α` → `ℕ`; `α` → `ℕ`; removed `[IsT
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
@@ -655,7 +680,7 @@ Change: removed `{α : Type u_1}`; `α` → `ℕ`; `α` → `ℕ`; removed `[IsT
 - **Shapes** — `arith_op`, `conj_hypothesis`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 28 Lean calls, 106.3s
+- **Cost** — 28 Lean calls, 111.3s
 
 **Original signature (as it appears in the sheet):**
 
@@ -671,7 +696,7 @@ Change: removed `{α : Type u_1}`; `α` → `ℕ`; `α` → `ℕ`; removed `[IsT
     a = b ∧ c = d)
 ```
 
-#### Variants produced (13/28)
+#### Variants produced (14/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -721,6 +746,16 @@ Change: `MulZeroClass` → `MulZeroOneClass`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {γ : Type u_1} [inst : MulZeroClass γ] {x y z w : γ} [inst_1 : PartialOrder γ]
+    [PosMulStrictMono γ] [MulPosStrictMono γ], x ≤ y → z ≤ w → 0 < x → 0 < w → (x * z = y * w ↔
+    x = y ∧ z = w)
+```
+
+Change: `{α` → `{γ`; `α] {a b c d` → `γ] {x y z w`; `α}` → `γ}`; `α]` → `γ]`; `α]` → `γ]`; `α], a` → `γ], x`; …and 13 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -799,7 +834,7 @@ Change: removed `{α : Type u_1} [inst : MulZeroClass α]`; `α} [inst_1 : Parti
 
 Change: `MulZeroClass` → `Semiring`
 
-#### Did not fire (15)
+#### Did not fire (14)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -811,7 +846,6 @@ Change: `MulZeroClass` → `Semiring`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
 | `arith_op_swap` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
@@ -828,7 +862,7 @@ Change: `MulZeroClass` → `Semiring`
 - **Shapes** — `arith_op`, `disjunction`, `forall_then_exists`, `implication`, `inequality`, `numeral`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 18 Lean calls, 104.5s
+- **Cost** — 18 Lean calls, 109.5s
 
 **Original signature (as it appears in the sheet):**
 
@@ -884,11 +918,11 @@ Change: `<` → `>`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} (wv1 : wv0 → wv0 → Prop) (wv2 : ℕ → wv0), ∃ (g : ℕ ↪o ℕ), (∀ (n : ℕ), wv1
-    (wv2 (g n)) (wv2 (g (n + 1)))) ∨ ∀ (m n : ℕ), m < n → ¬wv1 (wv2 (g m)) (wv2 (g n))
+∀ {β : Type u_1} (h : β → β → Prop) (φ : ℕ → β), ∃ (g : ℕ ↪o ℕ), (∀ (n : ℕ), h (φ (g n)) (φ (g
+    (n + 1)))) ∨ ∀ (m n : ℕ), m < n → ¬h (φ (g m)) (φ (g n))
 ```
 
-Change: `{α` → `{wv0`; `(r` → `(wv1`; `α` → `wv0`; `α` → `wv0`; `(f` → `(wv2`; `α),` → `wv0),`; …and 4 more
+Change: `{α` → `{β`; `(r` → `(h`; `α` → `β`; `α` → `β`; `(f` → `(φ`; `α),` → `β),`; …and 4 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -983,7 +1017,7 @@ Change: removed `{α : Type u_1}`; `α` → `ℕ`; `α` → `ℕ`; `α),` → `�
 - **Shapes** — `arith_op`, `conj_hypothesis`, `equality`, `implication`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 24 Lean calls, 119.8s
+- **Cost** — 24 Lean calls, 131.3s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1031,12 +1065,11 @@ Change: `LinearOrder` → `LinearOrderedAddCommGroupWithTop`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} [wv1 : LinearOrder wv0] {wv2 : wv0 → ℝ} {wv3 : Set wv0},
-    LocallyBoundedVariationOn wv2 wv3 → ∃ (p : wv0 → ℝ) (q : wv0 → ℝ), MonotoneOn p wv3 ∧
-    MonotoneOn q wv3 ∧ wv2 = p - q
+∀ {κ : Type u_1} [inst : LinearOrder κ] {G : κ → ℝ} {C : Set κ}, LocallyBoundedVariationOn G C →
+    ∃ (p : κ → ℝ) (q : κ → ℝ), MonotoneOn p C ∧ MonotoneOn q C ∧ G = p - q
 ```
 
-Change: `{α` → `{wv0`; `[inst` → `[wv1`; `α] {f` → `wv0] {wv2`; `α` → `wv0`; `{s` → `{wv3`; `α},` → `wv0},`; …and 6 more
+Change: `{α` → `{κ`; `α] {f` → `κ] {G`; `α` → `κ`; `{s` → `{C`; `α},` → `κ},`; `f s` → `G C`; …and 5 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -1125,7 +1158,7 @@ Change: `LinearOrder` → `CompleteLinearOrder`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `disjunction`, `equality`, `implication`, `inequality`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 24 Lean calls, 102.0s
+- **Cost** — 24 Lean calls, 109.3s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1140,7 +1173,7 @@ Change: `LinearOrder` → `CompleteLinearOrder`
     [MulRightStrictMono α], a * b = c * d → a = c ∧ b = d ∨ a < c ∨ b < d
 ```
 
-#### Variants produced (12/28)
+#### Variants produced (13/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -1186,6 +1219,15 @@ Change: `Mul` → `CommMagma`
 ```
 
 Change: `<` → `>`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {δ : Type u_1} [inst : Mul δ] [inst_1 : LinearOrder δ] {x y z w : δ} [MulLeftStrictMono δ]
+    [MulRightStrictMono δ], x * y = z * w → x = z ∧ y = w ∨ x < z ∨ y < w
+```
+
+Change: `{α` → `{δ`; `α]` → `δ]`; `α] {a b c d` → `δ] {x y z w`; `α}` → `δ}`; `α]` → `δ]`; `α], a` → `δ], x`; …and 11 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -1249,7 +1291,7 @@ Change: removed `{α : Type u_1} [inst : Mul α] [inst_1 : LinearOrder α]`; `α
 
 Change: `LinearOrder` → `CompleteLinearOrder`
 
-#### Did not fire (16)
+#### Did not fire (15)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -1261,7 +1303,6 @@ Change: `LinearOrder` → `CompleteLinearOrder`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
@@ -1279,7 +1320,7 @@ Change: `LinearOrder` → `CompleteLinearOrder`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `disjunction`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 19 Lean calls, 108.0s
+- **Cost** — 19 Lean calls, 112.8s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1340,12 +1381,12 @@ Change: `1` → `0`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} {wv1 : Ordnode wv0} {wv2 : ℕ} {wv3 : Ordnode wv0} {wv4 : ℕ},
-    Ordnode.BalancedSz wv2 wv4 → wv1.size.dist wv2 ≤ 1 ∧ wv3.size = wv4 ∨ wv3.size.dist wv4 ≤ 1
-    ∧ wv1.size = wv2 → 2 * wv3.size ≤ 9 * wv1.size + 5 ∨ wv3.size ≤ 3
+∀ {τ : Type u_1} {y : Ordnode τ} {n : ℕ} {z : Ordnode τ} {k : ℕ}, Ordnode.BalancedSz n k →
+    y.size.dist n ≤ 1 ∧ z.size = k ∨ z.size.dist k ≤ 1 ∧ y.size = n → 2 * z.size ≤ 9 * y.size +
+    5 ∨ z.size ≤ 3
 ```
 
-Change: `{α` → `{wv0`; `{l` → `{wv1`; `α} {l'` → `wv0} {wv2`; `{r` → `{wv3`; `α} {r'` → `wv0} {wv4`; `l' r'` → `wv2 wv4`; …and 9 more
+Change: `{α` → `{τ`; `{l` → `{y`; `α} {l'` → `τ} {n`; `{r` → `{z`; `α} {r'` → `τ} {k`; `l' r'` → `n k`; …and 9 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -1465,7 +1506,7 @@ Change: removed `{α : Type u_1}`; `α}` → `ℕ}`; `α}` → `ℕ}`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 28 Lean calls, 108.0s
+- **Cost** — 28 Lean calls, 112.6s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1481,7 +1522,7 @@ Change: removed `{α : Type u_1}`; `α}` → `ℕ}`; `α}` → `ℕ}`
     a = b ∧ c = d)
 ```
 
-#### Variants produced (13/28)
+#### Variants produced (14/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -1531,6 +1572,16 @@ Change: `MulZeroClass` → `MulZeroOneClass`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {σ : Type u_1} [inst : MulZeroClass σ] {x y z w : σ} [inst_1 : PartialOrder σ]
+    [PosMulStrictMono σ] [MulPosStrictMono σ], x ≤ y → z ≤ w → 0 < y → 0 < z → (x * z = y * w ↔
+    x = y ∧ z = w)
+```
+
+Change: `{α` → `{σ`; `α] {a b c d` → `σ] {x y z w`; `α}` → `σ}`; `α]` → `σ]`; `α]` → `σ]`; `α], a` → `σ], x`; …and 13 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -1609,7 +1660,7 @@ Change: removed `{α : Type u_1} [inst : MulZeroClass α]`; `α} [inst_1 : Parti
 
 Change: `MulZeroClass` → `Semiring`
 
-#### Did not fire (15)
+#### Did not fire (14)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -1621,7 +1672,6 @@ Change: `MulZeroClass` → `Semiring`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
 | `arith_op_swap` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
@@ -1638,7 +1688,7 @@ Change: `MulZeroClass` → `Semiring`
 - **Shapes** — `arith_op`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 25 Lean calls, 118.6s
+- **Cost** — 25 Lean calls, 121.2s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1709,12 +1759,12 @@ Change: `≤` → `≥`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} {wv1 : Type u_2} [wv2 : CommRing wv0] [wv3 : CommRing wv1] (wv4 : wv0 →+*
-    wv1), Function.Surjective ⇑wv4 → ∀ {r : wv0}, r ∈ nonZeroDivisors wv0 → wv4 r = 0 →
-    ringKrullDim wv1 + 1 ≤ ringKrullDim wv0
+∀ {τ : Type u_1} {α : Type u_2} [inst : CommRing τ] [inst_1 : CommRing α] (G : τ →+* α),
+    Function.Surjective ⇑G → ∀ {r : τ}, r ∈ nonZeroDivisors τ → G r = 0 → ringKrullDim α + 1 ≤
+    ringKrullDim τ
 ```
 
-Change: `{R` → `{wv0`; `{S` → `{wv1`; `[inst` → `[wv2`; `R] [inst_1` → `wv0] [wv3`; `S] (f` → `wv1] (wv4`; `R` → `wv0`; …and 7 more
+Change: `{R` → `{τ`; `{S` → `{α`; `R]` → `τ]`; `S] (f` → `α] (G`; `R` → `τ`; `S),` → `α),`; …and 6 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -1832,7 +1882,7 @@ Change: `CommRing` → `CommSemiring`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `disjunction`, `implication`, `inequality`, `numeral`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 26 Lean calls, 108.6s
+- **Cost** — 26 Lean calls, 108.7s
 
 **Original signature (as it appears in the sheet):**
 
@@ -1847,7 +1897,7 @@ Change: `CommRing` → `CommSemiring`
     [PosMulStrictMono R], 0 ≤ a * b → 0 ≤ a ∧ 0 ≤ b ∨ a ≤ 0 ∧ b ≤ 0
 ```
 
-#### Variants produced (13/28)
+#### Variants produced (14/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -1893,6 +1943,15 @@ Change: `Semiring` → `CommSemiring`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {δ : Type u_1} [inst : Semiring δ] [inst_1 : LinearOrder δ] {d x : δ} [MulPosStrictMono δ]
+    [PosMulStrictMono δ], 0 ≤ d * x → 0 ≤ d ∧ 0 ≤ x ∨ d ≤ 0 ∧ x ≤ 0
+```
+
+Change: `{R` → `{δ`; `R]` → `δ]`; `R] {a b` → `δ] {d x`; `R}` → `δ}`; `R]` → `δ]`; `R],` → `δ],`; …and 6 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -1965,7 +2024,7 @@ Change: removed `{R : Type u_1} [inst : Semiring R] [inst_1 : LinearOrder R]`; `
 
 Change: `Semiring` → `CommMonoidWithZero`
 
-#### Did not fire (15)
+#### Did not fire (14)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -1977,7 +2036,6 @@ Change: `Semiring` → `CommMonoidWithZero`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | no-op | output identical to the anchor |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
@@ -1994,7 +2052,7 @@ Change: `Semiring` → `CommMonoidWithZero`
 - **Shapes** — `conj_hypothesis`, `disjunction`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 17 Lean calls, 97.0s
+- **Cost** — 17 Lean calls, 122.5s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2041,11 +2099,11 @@ Change: `<` → `>`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : ℤ}, 0 < wv0 → ¬IsSquare wv0 → ∃! a₁ : Pell.Solution₁ wv0, 1 < a₁.x ∧ 0 < a₁.y ∧ ∀ (a :
-    Pell.Solution₁ wv0), ∃ (n : ℤ), a = a₁ ^ n ∨ a = -a₁ ^ n
+∀ {q : ℤ}, 0 < q → ¬IsSquare q → ∃! a₁ : Pell.Solution₁ q, 1 < a₁.x ∧ 0 < a₁.y ∧ ∀ (a :
+    Pell.Solution₁ q), ∃ (n : ℤ), a = a₁ ^ n ∨ a = -a₁ ^ n
 ```
 
-Change: `{d` → `{wv0`; `d` → `wv0`; `d` → `wv0`; `d,` → `wv0,`; `d),` → `wv0),`
+Change: `{d` → `{q`; `d` → `q`; `d` → `q`; `d,` → `q,`; `d),` → `q),`
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -2133,7 +2191,7 @@ Change: `0` → `1`
 - **Shapes** — `arith_op`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 25 Lean calls, 97.1s
+- **Cost** — 25 Lean calls, 123.4s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2149,7 +2207,7 @@ Change: `0` → `1`
     0 ≤ a → 0 ≤ b → r ^ 2 = a * b → 2 * r ≤ a + b
 ```
 
-#### Variants produced (14/28)
+#### Variants produced (15/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -2200,6 +2258,16 @@ Change: `CommSemiring` → `CommRing`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {γ : Type u_1} [inst : CommSemiring γ] [inst_1 : LinearOrder γ] [ExistsAddOfLE γ]
+    [MulPosStrictMono γ] [PosMulStrictMono γ] [AddLeftReflectLE γ] [AddLeftMono γ] {x y z : γ},
+    0 ≤ x → 0 ≤ y → z ^ 2 = x * y → 2 * z ≤ x + y
+```
+
+Change: `{R` → `{γ`; `R]` → `γ]`; `R]` → `γ]`; `R]` → `γ]`; `R]` → `γ]`; `R]` → `γ]`; …and 11 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -2289,7 +2357,7 @@ Change: removed `{R : Type u_1} [inst : CommSemiring R] [inst_1 : LinearOrder R]
 
 Change: `CommSemiring` → `CommRing`
 
-#### Did not fire (14)
+#### Did not fire (13)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -2301,7 +2369,6 @@ Change: `CommSemiring` → `CommRing`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
 | `connective_swap` | n/a | shape did not match; no Lean call made |
@@ -2317,7 +2384,7 @@ Change: `CommSemiring` → `CommRing`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 32 Lean calls, 95.3s
+- **Cost** — 32 Lean calls, 127.0s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2333,7 +2400,7 @@ Change: `CommSemiring` → `CommRing`
     (0 < a → 0 ≤ b) ∧ (0 < b → 0 ≤ a)
 ```
 
-#### Variants produced (13/28)
+#### Variants produced (14/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -2384,6 +2451,16 @@ Change: `Semiring` → `CommSemiring`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {σ : Type u_1} [inst : Semiring σ] [inst_1 : LinearOrder σ] {x y : σ} [ExistsAddOfLE σ]
+    [PosMulStrictMono σ] [MulPosStrictMono σ] [AddLeftMono σ] [AddLeftReflectLE σ], 0 ≤ x * y ↔
+    (0 < x → 0 ≤ y) ∧ (0 < y → 0 ≤ x)
+```
+
+Change: `{R` → `{σ`; `R]` → `σ]`; `R] {a b` → `σ] {x y`; `R}` → `σ}`; `R]` → `σ]`; `R]` → `σ]`; …and 9 more
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -2463,7 +2540,7 @@ Change: removed `{R : Type u_1} [inst : Semiring R] [inst_1 : LinearOrder R]`; `
 
 Change: `LinearOrder` → `CompleteLinearOrder`
 
-#### Did not fire (15)
+#### Did not fire (14)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -2475,7 +2552,6 @@ Change: `LinearOrder` → `CompleteLinearOrder`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `premise_permute` | n/a | shape did not match; no Lean call made |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `definitional_unfold` | tactic failed | tactic 'unfold_defs' ran but extract_goal produced nothing |
@@ -2492,7 +2568,7 @@ Change: `LinearOrder` → `CompleteLinearOrder`
 - **Shapes** — `arith_op`, `disjunction`, `equality`, `implication`, `numeral`, `two_hypotheses`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 37 Lean calls, 94.1s
+- **Cost** — 37 Lean calls, 123.5s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2539,11 +2615,11 @@ Change: `Semiring` → `CommSemiring`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} [wv1 : Semiring wv0] {wv2 : Ideal wv0}, wv2.IsPrime → ∀ {x y : wv0}, x * y =
-    0 → x ∈ wv2 ∨ y ∈ wv2
+∀ {β : Type u_1} [inst : Semiring β] {z : Ideal β}, z.IsPrime → ∀ {x y : β}, x * y = 0 → x ∈ z ∨
+    y ∈ z
 ```
 
-Change: `{α` → `{wv0`; `[inst` → `[wv1`; `α] {I` → `wv0] {wv2`; `α}, I.IsPrime` → `wv0}, wv2.IsPrime`; `α},` → `wv0},`; `I` → `wv2`; …and 1 more
+Change: `{α` → `{β`; `α] {I` → `β] {z`; `α}, I.IsPrime` → `β}, z.IsPrime`; `α},` → `β},`; `I` → `z`; `I` → `z`
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -2630,7 +2706,7 @@ Change: removed `{α : Type u_1} [inst : Semiring α]`; `α},` → `ℕ},`; `α}
 - **Shapes** — `arith_op`, `conj_hypothesis`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 30 Lean calls, 98.5s
+- **Cost** — 30 Lean calls, 154.1s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2646,7 +2722,7 @@ Change: removed `{α : Type u_1} [inst : Semiring α]`; `α},` → `ℕ},`; `α}
     Associates M}, r ≤ p ^ n ↔ ∃ (i : Fin (n + 1)), r = c i
 ```
 
-#### Variants produced (15/28)
+#### Variants produced (16/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -2698,6 +2774,16 @@ Change: `CommMonoidWithZero` → `CommGroupWithZero`
 ```
 
 Change: `≤` → `≥`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {α : Type u_1} [inst : CommMonoidWithZero α] [IsCancelMulZero α] {a : Associates α} {k : ℕ}, k
+    ≠ 0 → Prime a → ∃ (c : Fin (k + 1) → Associates α), c 1 = a ∧ StrictMono c ∧ ∀ {r :
+    Associates α}, r ≤ a ^ k ↔ ∃ (i : Fin (k + 1)), r = c i
+```
+
+Change: `{M` → `{α`; `M]` → `α]`; `M] {p` → `α] {a`; `M} {n` → `α} {k`; `n` → `k`; `p` → `a`; …and 7 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -2798,7 +2884,7 @@ Change: removed `{M : Type u_1} [inst : CommMonoidWithZero M] [IsCancelMulZero M
 
 Change: `CommMonoidWithZero` → `CommRing`
 
-#### Did not fire (13)
+#### Did not fire (12)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -2810,7 +2896,6 @@ Change: `CommMonoidWithZero` → `CommRing`
 | `tc_strengthen_conc` | n/a | shape did not match; no Lean call made |
 | `tc_weaken_conc` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `arith_op_swap` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `forall_to_exists` | n/a | shape did not match; no Lean call made |
@@ -2825,7 +2910,7 @@ Change: `CommMonoidWithZero` → `CommRing`
 - **Shapes** — `disjunction`, `equality`, `implication`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 65 Lean calls, 145.6s
+- **Cost** — 65 Lean calls, 238.0s
 
 **Original signature (as it appears in the sheet):**
 
@@ -2841,7 +2926,7 @@ Change: `CommMonoidWithZero` → `CommRing`
     I.IsMaximal → Ideal.map f I = ⊤ ∨ (Ideal.map f I).IsMaximal
 ```
 
-#### Variants produced (11/28)
+#### Variants produced (12/28)
 
 ##### `negate` — logical, inferred truth: **false**
 
@@ -2882,6 +2967,16 @@ Change: `[RingHomClass` → `[AddMonoidHomClass`
 ```
 
 Change: `Semiring` → `CommSemiring`
+
+##### `alpha_rename` — structure, inferred truth: **true**
+
+```lean
+∀ {ζ : Type u_1} {ι : Type u_2} {κ : Type u_3} [inst : Semiring ζ] [inst_1 : Semiring ι] [inst_2
+    : FunLike κ ζ ι] (w : κ) [RingHomClass κ ζ ι], Function.Surjective ⇑w → ∀ {I : Ideal ζ},
+    I.IsMaximal → Ideal.map w I = ⊤ ∨ (Ideal.map w I).IsMaximal
+```
+
+Change: `{R` → `{ζ`; `{S` → `{ι`; `{F` → `{κ`; `R]` → `ζ]`; `S]` → `ι]`; `F R S] (f` → `κ ζ ι] (w`; …and 6 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -2953,7 +3048,7 @@ Change: `∨` → `∧`
 
 Change: `[RingHomClass` → `[NonUnitalRingHomClass`
 
-#### Did not fire (17)
+#### Did not fire (16)
 
 | Perturbation | Outcome | Why |
 |---|---|---|
@@ -2966,7 +3061,6 @@ Change: `[RingHomClass` → `[NonUnitalRingHomClass`
 | `tc_weaken_conc` | rejected | 4 candidate(s) proposed, all rejected by the Lean type-checker |
 | `flip_bound` | n/a | shape did not match; no Lean call made |
 | `bound_tighter` | n/a | shape did not match; no Lean call made |
-| `alpha_rename` | rejected | 1 candidate(s) proposed, all rejected by the Lean type-checker |
 | `curry` | tactic failed | tactic 'curry' ran but extract_goal produced nothing |
 | `strictness_swap` | n/a | shape did not match; no Lean call made |
 | `arith_op_swap` | n/a | shape did not match; no Lean call made |
@@ -2984,7 +3078,7 @@ Change: `[RingHomClass` → `[NonUnitalRingHomClass`
 - **Shapes** — `conj_hypothesis`, `disjunction`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 18 Lean calls, 116.1s
+- **Cost** — 18 Lean calls, 197.2s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3041,11 +3135,11 @@ Change: `1` → `0`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} [wv1 : DecidableEq wv0] {wv2 wv3 : List wv0}, wv2.Nodup → wv3.Nodup →
-    (wv2.formPerm = wv3.formPerm ↔ wv2 ~r wv3 ∨ wv2.length ≤ 1 ∧ wv3.length ≤ 1)
+∀ {ε : Type u_1} [inst : DecidableEq ε] {x y : List ε}, x.Nodup → y.Nodup → (x.formPerm =
+    y.formPerm ↔ x ~r y ∨ x.length ≤ 1 ∧ y.length ≤ 1)
 ```
 
-Change: `{α` → `{wv0`; `[inst` → `[wv1`; `α] {l l'` → `wv0] {wv2 wv3`; `α}, l.Nodup` → `wv0}, wv2.Nodup`; `l'.Nodup` → `wv3.Nodup`; `(l.formPerm` → `(wv2.formPerm`; …and 5 more
+Change: `{α` → `{ε`; `α] {l l'` → `ε] {x y`; `α}, l.Nodup` → `ε}, x.Nodup`; `l'.Nodup` → `y.Nodup`; `(l.formPerm` → `(x.formPerm`; `l'.formPerm` → `y.formPerm`; …and 4 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -3140,7 +3234,7 @@ Change: removed `{α : Type u_1} [inst : DecidableEq α]`; `α},` → `ℕ},`
 - **Shapes** — `arith_op`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 17 Lean calls, 93.7s
+- **Cost** — 17 Lean calls, 156.2s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3187,11 +3281,11 @@ Change: `≤` → `≥`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : ℕ → ℕ} {wv1 wv2 : ℕ}, Monotone wv0 → (∀ (m : ℕ), wv0 m ≤ wv1) → (∀ (m : ℕ), wv0 m = wv0
-    (m + 1) → wv0 (m + 1) = wv0 (m + 2)) → wv1 ≤ wv2 → wv0 wv2 = wv0 wv1
+∀ {g : ℕ → ℕ} {k i : ℕ}, Monotone g → (∀ (m : ℕ), g m ≤ k) → (∀ (m : ℕ), g m = g (m + 1) → g (m
+    + 1) = g (m + 2)) → k ≤ i → g i = g k
 ```
 
-Change: `{f` → `{wv0`; `{b n` → `{wv1 wv2`; `f` → `wv0`; `f` → `wv0`; `b)` → `wv1)`; `f` → `wv0`; …and 7 more
+Change: `{f` → `{g`; `{b n` → `{k i`; `f` → `g`; `f` → `g`; `b)` → `k)`; `f` → `g`; …and 7 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -3295,7 +3389,7 @@ Change: `1)` → `0)`
 - **Shapes** — `arith_op`, `conj_hypothesis`, `implication`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 18 Lean calls, 98.3s
+- **Cost** — 18 Lean calls, 165.1s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3342,11 +3436,11 @@ Change: `PseudoMetricSpace` → `MetricSpace`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} [wv1 : PseudoMetricSpace wv0] (wv2 : ℕ → wv0), CauchySeq wv2 → ∃ (f : ℕ → ℕ),
-    StrictMono f ∧ Summable fun (i : ℕ) ↦ dist (wv2 (f (i + 1))) (wv2 (f i))
+∀ {ι : Type u_1} [inst : PseudoMetricSpace ι] (g : ℕ → ι), CauchySeq g → ∃ (f : ℕ → ℕ),
+    StrictMono f ∧ Summable fun (i : ℕ) ↦ dist (g (f (i + 1))) (g (f i))
 ```
 
-Change: `{α` → `{wv0`; `[inst` → `[wv1`; `α] (u` → `wv0] (wv2`; `α),` → `wv0),`; `u` → `wv2`; `(u` → `(wv2`; …and 1 more
+Change: `{α` → `{ι`; `α] (u` → `ι] (g`; `α),` → `ι),`; `u` → `g`; `(u` → `(g`; `(u` → `(g`
 
 ##### `implicit_explicit_toggle` — structure, inferred truth: **true**
 
@@ -3434,7 +3528,7 @@ Change: removed `{α : Type u_1} [inst : PseudoMetricSpace α]`; `α),` → `ℕ
 - **Shapes** — `arith_op`, `disjunction`, `equality`, `implication`, `numeral`, `two_hypotheses`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 17 Lean calls, 186.8s
+- **Cost** — 17 Lean calls, 311.0s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3475,12 +3569,12 @@ Change: `Function.Even` → `¬Function.Even`; `→` → `∨`; `≠` → `=`; `
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : ℕ} [wv1 : NeZero wv0] {wv2 : ZMod wv0 → ℂ}, Function.Even wv2 → ∀ (s : ℂ), s ≠ 0 ∨ ∑ j
-    : ZMod wv0, wv2 j = 0 → s ≠ 1 ∨ wv2 0 = 0 → ZMod.completedLFunction wv2 (1 - s) = ↑wv0 ^ (s
-    - 1) * ZMod.completedLFunction (ZMod.dft wv2) s
+∀ {q : ℕ} [inst : NeZero q] {G : ZMod q → ℂ}, Function.Even G → ∀ (s : ℂ), s ≠ 0 ∨ ∑ j : ZMod q,
+    G j = 0 → s ≠ 1 ∨ G 0 = 0 → ZMod.completedLFunction G (1 - s) = ↑q ^ (s - 1) *
+    ZMod.completedLFunction (ZMod.dft G) s
 ```
 
-Change: `{N` → `{wv0`; `[inst` → `[wv1`; `N] {Φ` → `wv0] {wv2`; `N` → `wv0`; `Φ` → `wv2`; `N, Φ` → `wv0, wv2`; …and 4 more
+Change: `{N` → `{q`; `N] {Φ` → `q] {G`; `N` → `q`; `Φ` → `G`; `N, Φ` → `q, G`; `Φ` → `G`; …and 3 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -3575,7 +3669,7 @@ Change: `0` → `1`
 - **Shapes** — `conj_hypothesis`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`, `unfoldable_predicate`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 19 Lean calls, 96.5s
+- **Cost** — 19 Lean calls, 155.1s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3635,12 +3729,12 @@ Change: `≥` → `≤`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ {wv0 : Type u_1} [wv1 : PseudoMetricSpace wv0] (wv2 : ℕ → wv0), CauchySeq wv2 → ∀ (b : ℕ → ℝ),
-    (∀ (n : ℕ), 0 < b n) → ∃ (f : ℕ → ℕ), StrictMono f ∧ ∀ (n m : ℕ), m ≥ f n → dist (wv2 m)
-    (wv2 (f n)) < b n
+∀ {τ : Type u_1} [inst : PseudoMetricSpace τ] (G : ℕ → τ), CauchySeq G → ∀ (b : ℕ → ℝ), (∀ (n :
+    ℕ), 0 < b n) → ∃ (f : ℕ → ℕ), StrictMono f ∧ ∀ (n m : ℕ), m ≥ f n → dist (G m) (G (f n)) < b
+    n
 ```
 
-Change: `{α` → `{wv0`; `[inst` → `[wv1`; `α] (u` → `wv0] (wv2`; `α),` → `wv0),`; `u` → `wv2`; `(u` → `(wv2`; …and 1 more
+Change: `{α` → `{τ`; `α] (u` → `τ] (G`; `α),` → `τ),`; `u` → `G`; `(u` → `(G`; `(u` → `(G`
 
 ##### `premise_permute` — structure, inferred truth: **true**
 
@@ -3741,7 +3835,7 @@ Change: removed `{α : Type u_1} [inst : PseudoMetricSpace α]`; `α),` → `ℕ
 - **Shapes** — `disjunction`, `equality`, `implication`, `inequality`, `numeral`, `two_hypotheses`, `typeclass_binder`
 - **Kind** — theorem
 - **Anchor elaborates** — yes
-- **Cost** — 63 Lean calls, 101.9s
+- **Cost** — 63 Lean calls, 152.3s
 
 **Original signature (as it appears in the sheet):**
 
@@ -3802,13 +3896,12 @@ Change: `<` → `>`
 ##### `alpha_rename` — structure, inferred truth: **true**
 
 ```lean
-∀ (wv0 : Type u_1) {wv1 : Type u_2} [wv2 : CommRing wv0] [wv3 : Ring wv1] [wv4 : Algebra wv0
-    wv1] (wv5 : wv1) {wv6 : Polynomial wv0}, wv6.Monic → (Polynomial.aeval wv5) wv6 = 0 → (∀ (q
-    : Polynomial wv0), q.degree < wv6.degree → q = 0 ∨ (Polynomial.aeval wv5) q ≠ 0) → wv6 =
-    minpoly wv0 wv5
+∀ (ζ : Type u_1) {ι : Type u_2} [inst : CommRing ζ] [inst_1 : Ring ι] [inst_2 : Algebra ζ ι] (b
+    : ι) {c : Polynomial ζ}, c.Monic → (Polynomial.aeval b) c = 0 → (∀ (q : Polynomial ζ),
+    q.degree < c.degree → q = 0 ∨ (Polynomial.aeval b) q ≠ 0) → c = minpoly ζ b
 ```
 
-Change: `(A` → `(wv0`; `{B` → `{wv1`; `[inst` → `[wv2`; `A] [inst_1` → `wv0] [wv3`; `B] [inst_2` → `wv1] [wv4`; `A B] (x` → `wv0 wv1] (wv5`; …and 8 more
+Change: `(A` → `(ζ`; `{B` → `{ι`; `A]` → `ζ]`; `B]` → `ι]`; `A B] (x` → `ζ ι] (b`; `B) {p` → `ι) {c`; …and 7 more
 
 ##### `premise_permute` — structure, inferred truth: **true**
 

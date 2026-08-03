@@ -194,7 +194,7 @@ PERTURBATIONS: list[Perturbation] = [
         name="alpha_rename",
         fn=structure.alpha_rename,
         propagation={"true": "true", "false": "false", "unknown": "unknown"},
-        description="Rename every bound variable to a fresh name. Equivalent.",
+        description="Rename bound variables to other idiomatic names. Equivalent.",
         layer="structure",
     ),
     Perturbation(

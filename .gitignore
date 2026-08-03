@@ -16,3 +16,4 @@ logs/
 _demo_tmp.lean
 _tmp_nb.lean
 _*_tmp.lean
+.DS_Store

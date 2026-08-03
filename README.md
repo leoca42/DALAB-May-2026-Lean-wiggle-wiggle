@@ -66,20 +66,23 @@ The hackathon demo lives in [`hackathon-demo/`](hackathon-demo/).
 
 ## What the perturbations look like so far
 
-Measured over 287 Lean-verified variants of 24 Mathlib anchors, using purely
+Measured over 298 Lean-verified variants of 24 Mathlib anchors, using purely
 lexical similarity — no model — so the numbers are the floor that word matching
 gets for free ([`analyze_geometry.py`](pipeline/analyze_geometry.py)):
 
-- Variants land **93% of the way** from "unrelated theorem" to "identical
-  string", and **99%** still retrieve their own anchor. Perturbing a statement
+- Variants land **90% of the way** from "unrelated theorem" to "identical
+  string", and **95%** still retrieve their own anchor. Perturbing a statement
   does not move it, which is the intended shape for hard negatives.
 - Where an equivalence-preserving rewrite actually rewrote something, the
-  *logically different* variant is the lexically closer one **87%** of the time.
+  *logically different* variant is the lexically closer one **90%** of the time.
   Surface similarity is not just uninformative here, it is **anti-correlated**
   with logical similarity.
 - The one-token logical edits (`strictness_swap`, `connective_swap`,
   `const_to_zero_one`, `flip_bound`, …) sit at a surface change of ≈0.00 while
   changing what the theorem says. Those are the pairs worth training on.
+- Positives are the thin side: only `alpha_rename` and `de_morgan_rewrite`
+  rewrite enough of a statement to be worth training on, and they sit at
+  opposite extremes with nothing in between.
 - Chaining perturbations is what buys distance: at depth 3 the mean collapse
   falls to 0.77, and some variants land as far out as an unrelated theorem.
 

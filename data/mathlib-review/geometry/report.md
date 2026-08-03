@@ -1,6 +1,6 @@
 # Where do the perturbed statements sit?
 
-287 variants across 24 anchors, scored with 4 lexical (non-neural) similarity views. No model is involved: these numbers are what pure word matching can see.
+298 variants across 24 anchors, scored with 4 lexical (non-neural) similarity views. No model is involved: these numbers are what pure word matching can see.
 
 ## Baseline — two unrelated theorems
 
@@ -21,14 +21,14 @@ _(276 anchor pairs.)_
 
 | View | raw similarity | collapse |
 |---|---|---|
-| TF-IDF over Lean tokens (bag of words) | 0.943 ± 0.127 | **0.925** ± 0.165 |
-| TF-IDF over character 3–5-grams (subword surface form) | 0.909 ± 0.154 | **0.898** ± 0.172 |
-| Token-set overlap (order-blind word matching) | 0.908 ± 0.107 | **0.860** ± 0.163 |
-| Token-sequence alignment (order-aware) | 0.925 ± 0.101 | **0.894** ± 0.143 |
+| TF-IDF over Lean tokens (bag of words) | 0.919 ± 0.176 | **0.895** ± 0.228 |
+| TF-IDF over character 3–5-grams (subword surface form) | 0.907 ± 0.147 | **0.896** ± 0.164 |
+| Token-set overlap (order-blind word matching) | 0.905 ± 0.106 | **0.856** ± 0.161 |
+| Token-sequence alignment (order-aware) | 0.919 ± 0.105 | **0.886** ± 0.148 |
 
 ## Retrieval — does a variant still find its own anchor?
 
-**283/287 (99%)** of variants rank their own anchor first among all 24 anchors under tf-idf over lean tokens (bag of words).
+**284/298 (95%)** of variants rank their own anchor first among all 24 anchors under tf-idf over lean tokens (bag of words).
 
 ## Per-perturbation
 
@@ -38,26 +38,26 @@ Grouped by the last step of the path. `surface Δ` is `1 − collapse`: how far 
 
 | Perturbation | class | n | collapse | surface Δ | surface Δ (order-aware) | meaning Δ | signal | verdict |
 |---|---|---|---|---|---|---|---|---|
-| `negate` | contradictory | 24 | 0.873 | 0.127 | 0.403 | 1.00 | **+0.87** | **hard negative** — looks the same, means something else |
+| `negate` | contradictory | 24 | 0.874 | 0.126 | 0.403 | 1.00 | **+0.87** | **hard negative** — looks the same, means something else |
 | `quantifier_swap` | graded | 2 | 1.000 | 0.000 | 0.150 | 0.67 | **+0.67** | **hard negative** — looks the same, means something else |
 | `eq_to_le` | graded | 12 | 0.997 | 0.003 | 0.021 | 0.67 | **+0.67** | **hard negative** — looks the same, means something else |
 | `connective_swap` | graded | 21 | 0.997 | 0.003 | 0.022 | 0.67 | **+0.67** | **hard negative** — looks the same, means something else |
 | `const_to_zero_one` | graded | 18 | 0.996 | 0.004 | 0.022 | 0.67 | **+0.67** | **hard negative** — looks the same, means something else |
 | `strictness_swap` | graded | 18 | 0.996 | 0.004 | 0.021 | 0.67 | **+0.67** | **hard negative** — looks the same, means something else |
-| `forall_to_exists` | graded | 1 | 0.995 | 0.005 | 0.031 | 0.67 | **+0.66** | **hard negative** — looks the same, means something else |
+| `forall_to_exists` | graded | 1 | 0.994 | 0.006 | 0.031 | 0.67 | **+0.66** | **hard negative** — looks the same, means something else |
 | `arith_op_swap` | graded | 13 | 0.994 | 0.006 | 0.023 | 0.67 | **+0.66** | **hard negative** — looks the same, means something else |
 | `bound_tighter` | graded | 2 | 0.994 | 0.006 | 0.027 | 0.67 | **+0.66** | **hard negative** — looks the same, means something else |
 | `flip_bound` | graded | 18 | 0.986 | 0.014 | 0.021 | 0.67 | **+0.66** | **hard negative** — looks the same, means something else |
-| `tc_sibling_swap` | graded | 11 | 0.977 | 0.023 | 0.021 | 0.67 | **+0.65** | **hard negative** — looks the same, means something else |
+| `tc_sibling_swap` | graded | 11 | 0.978 | 0.022 | 0.021 | 0.67 | **+0.65** | **hard negative** — looks the same, means something else |
 | `tc_weaken_hyp` | graded | 10 | 0.970 | 0.030 | 0.021 | 0.67 | **+0.64** | **hard negative** — looks the same, means something else |
 | `tc_strengthen_hyp` | entailed | 17 | 0.974 | 0.026 | 0.021 | 0.34 | **+0.31** | moderate negative — surface hints at the change |
-| `specialize_type` | entailed | 19 | 0.759 | 0.241 | 0.290 | 0.34 | **+0.10** | aligned — surface overlap already gives the answer |
+| `specialize_type` | entailed | 19 | 0.758 | 0.242 | 0.290 | 0.34 | **+0.10** | aligned — surface overlap already gives the answer |
 | `premise_permute` | equivalent | 15 | 1.000 | 0.000 | 0.069 | 0.00 | **+0.00** | aligned — surface overlap already gives the answer |
 | `implicit_explicit_toggle` | equivalent | 24 | 0.996 | 0.004 | 0.043 | 0.00 | **-0.00** | aligned — surface overlap already gives the answer |
 | `uncurry` | equivalent | 19 | 0.976 | 0.024 | 0.077 | 0.00 | **-0.02** | aligned — surface overlap already gives the answer |
 | `definitional_unfold` | equivalent | 6 | 0.937 | 0.063 | 0.173 | 0.00 | **-0.06** | aligned — surface overlap already gives the answer |
-| `de_morgan_rewrite` | equivalent | 24 | 0.881 | 0.119 | 0.155 | 0.00 | **-0.12** | aligned — surface overlap already gives the answer |
-| `alpha_rename` | equivalent | 13 | 0.352 | 0.648 | 0.272 | 0.00 | **-0.65** | **extreme positive** — further away than an unrelated theorem |
+| `de_morgan_rewrite` | equivalent | 24 | 0.882 | 0.118 | 0.155 | 0.00 | **-0.12** | aligned — surface overlap already gives the answer |
+| `alpha_rename` | equivalent | 24 | 0.235 | 0.765 | 0.296 | 0.00 | **-0.76** | **extreme positive** — further away than an unrelated theorem |
 
 The `order-aware` column repeats the measurement under token-sequence alignment instead of a bag of words, which separates two very different reasons a perturbation can score near zero.
 
@@ -70,24 +70,24 @@ The `order-aware` column repeats the measurement under token-sequence alignment 
 
 ## Inversion — is surface similarity even pointing the right way?
 
-Across 771 (equivalent, non-equivalent) variant pairs sharing an anchor, the **non-equivalent** variant was lexically closer to the anchor **421 times (55%)**.
+Across 868 (equivalent, non-equivalent) variant pairs sharing an anchor, the **non-equivalent** variant was lexically closer to the anchor **517 times (60%)**.
 
-> Surface similarity carries **essentially no information** about logical similarity — a coin flip. There is nothing here for a word-matching model to exploit, so whatever the model learns, it has to learn from the logic.
+> Surface similarity is **anti-correlated** with logical similarity here. A model scoring by word overlap does not merely fail to learn the logic — it is actively pulled the wrong way, which is a plausible explanation for the natural-language training result.
 
 The aggregate hides most of the story, because it is dominated by whichever equivalence-preserving perturbation fires most often. Split by the positive side of the pair:
 
 | Equivalent variant | pairs | beaten by a non-equivalent variant |
 |---|---|---|
-| `alpha_rename` | 89 | **89 (100%)** |
+| `alpha_rename` | 186 | **186 (100%)** |
 | `definitional_unfold` | 44 | **39 (89%)** |
 | `de_morgan_rewrite` | 186 | **148 (80%)** |
 | `uncurry` | 154 | **79 (51%)** |
-| `implicit_explicit_toggle` | 186 | **66 (35%)** |
+| `implicit_explicit_toggle` | 186 | **65 (35%)** |
 | `premise_permute` | 112 | **0 (0%)** |
 
 A row near 100% is a perturbation whose *positive* pair a lexical model would rank below a *negative* pair of the same anchor — the exact case where word matching gives the wrong answer and logic gives the right one.
 
-Dropping positives that barely edit the string at all (`implicit_explicit_toggle`, `premise_permute`, `uncurry` — a positive that changes nothing cannot be beaten), the rate is **276/319 (87%)**. That is the number to quote: among pairs where the equivalence-preserving rewrite actually rewrote something, surface similarity points the wrong way most of the time.
+Dropping positives that barely edit the string at all (`implicit_explicit_toggle`, `premise_permute`, `uncurry` — a positive that changes nothing cannot be beaten), the rate is **373/416 (90%)**. That is the number to quote: among pairs where the equivalence-preserving rewrite actually rewrote something, surface similarity points the wrong way most of the time.
 
 ## Figures
 

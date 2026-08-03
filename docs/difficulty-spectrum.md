@@ -40,17 +40,17 @@ than the words did.
 
 ### The headline
 
-Across the 287 depth-1 variants from 24 shape-sampled Mathlib anchors:
+Across the 298 depth-1 variants from 24 shape-sampled Mathlib anchors:
 
-* variants sit at **collapse 0.93** — that is, 93% of the way from "unrelated
+* variants sit at **collapse 0.90** — that is, 90% of the way from "unrelated
   theorem" to "the identical string". They do essentially lie on the anchor,
   which is what we expected.
-* **283/287 (99%)** of variants still retrieve their own anchor as nearest
-  neighbour. No single perturbation moves a statement out of its own
-  neighbourhood.
+* **284/298 (95%)** of variants still retrieve their own anchor as nearest
+  neighbour. Of the 14 that do not, 10 are `alpha_rename` — every other
+  perturbation leaves the statement in its own neighbourhood.
 * among pairs where an equivalence-preserving rewrite actually rewrote
   something, a *logically different* variant was lexically **closer** to the
-  anchor than a *logically identical* one **87% of the time** (276/319).
+  anchor than a *logically identical* one **90% of the time** (373/416).
 
 That last number is the one that matters. Surface similarity is not merely
 uninformative about logical similarity here — it is **anti-correlated**. A
@@ -62,11 +62,16 @@ The other two runs reproduce it: 82% on the original 10 benchmark anchors, and
 on the deep run 96% against `alpha_rename` positives and 63% against
 `de_morgan_rewrite` positives.
 
+> Only the breadth run has been regenerated since `alpha_rename` was reworked
+> (see below). `data/benchmark-review` and `data/deep-chains` still contain
+> `wv0`-style variants, so their `alpha_rename` rows describe the old
+> transform. Every other perturbation is unaffected.
+
 ### Measured ranking
 
 Three runs, all reproducible from the repo:
 
-* **breadth run** — 287 variants, 24 Mathlib anchors sampled for syntactic
+* **breadth run** — 298 variants, 24 Mathlib anchors sampled for syntactic
   shape, one perturbation each (`data/mathlib-review`). **The primary
   measurement**: 20 of the 28 perturbations fire, most of them 10–24 times.
 * **depth-1 review** — 49 variants, 10 benchmark anchors
@@ -92,8 +97,8 @@ Numbers below are from the breadth run; `n` refers to it.
 | **Visible negative** | `negate` (24) | +0.87 | Highest signal in the set, but only because its meaning Δ is maximal — its surface Δ (0.13, and 0.40 order-aware) is the largest of any negative. See below. |
 | **Weak negative** | `tc_strengthen_hyp` (17) | +0.31 | Small logical move, small surface move. Low value either way. |
 | **Aligned** | `specialize_type` (19), `premise_permute` (15), `implicit_explicit_toggle` (24), `uncurry` (19), `definitional_unfold` (6) | +0.10 … −0.06 | Surface change tracks meaning change. **Teaches nothing.** |
-| **Best available positive** | `de_morgan_rewrite` (24) | −0.12 | Same proposition, visibly different string. Only −0.19 on the deep run and −0.12 here, so it does not clear the hard-positive bar (−0.15) on the breadth sample — but it is the only equivalence-preserving rewrite that is both substantial and not an artefact. |
-| **Broken positive** | `alpha_rename` (13) | −0.65 | See below — this is a bug, not a hard positive. |
+| **Moderate positive** | `de_morgan_rewrite` (24) | −0.12 | Same proposition, visibly different string. −0.19 on the deep run and −0.12 here, so it sits just under the hard-positive bar (−0.15) on this sample. |
+| **Extreme positive** | `alpha_rename` (24) | −0.76 | Logically identical, lexically almost a different theorem. The hardest positive in the set by a wide margin — see below. |
 
 The banding is much cleaner than the earlier read suggested. Once each step is
 measured against its own parent, nearly every *graded* perturbation collapses
@@ -133,19 +138,38 @@ perturbations without hunting for anchors of exactly the right shape.
 
 ### Two findings worth acting on
 
-**`alpha_rename` is currently harmful.** Its variants land *further* from the
-anchor than unrelated theorems do — collapse 0.35 over 13 breadth variants and
-0.12 over 8 deep ones — and in **100%** of breadth comparisons (89/89) a
-logically *different* variant is closer to the anchor than the α-renamed one.
-Not 96%, not most: every single one. The cause is already noted in
-[`perturbations.md`](perturbations.md): it renames every binder to `wv0`,
-`wv1`, …, which is out of distribution for Mathlib and rewrites a large
-fraction of the tokens. A model trained on this will learn "`wv` means
-perturbed", an artefact of our generator, not "renaming preserves meaning".
-Sampling realistic Mathlib-style names would turn the single most extreme
-hard positive in the set into a genuine one. Until then it is also distorting
-the aggregate inversion rate, since it alone accounts for 441 of the deep run's
-1617 comparison pairs.
+**`alpha_rename` had an artefact, and fixing it did not change the geometry.**
+The transform used to rename every binder to `wv0`, `wv1`, …, which is out of
+distribution for Mathlib: a model trained on that learns "`wv` means perturbed"
+rather than "renaming preserves meaning". It now draws replacements per binder
+*kind* (Greek letters for types, `m n k` for discrete quantities, `x y z` for
+continuous ones, `h`-names for hypotheses), rotates the choice by a hash of the
+statement so the names vary across theorems, and leaves instance binders alone.
+
+Two things came out of that, and only one was predicted.
+
+*Predicted, and wrong:* this document previously claimed that realistic names
+would "turn the single most extreme hard positive in the set into a genuine
+one" — implying the extremeness itself was the artefact. It is not. Measured
+before and after, collapse went from 0.35 to **0.24** and the inversion rate
+stayed pinned at **100%** (186/186). The distance was never about the names
+being weird; it is about *how many* tokens change. Identifiers are rare tokens
+and therefore carry high IDF weight, so renaming all of them rewrites most of
+what TF-IDF is looking at, whatever you rename them to. No naming scheme fixes
+that, because there is nothing to fix.
+
+*Unpredicted, and the actual win:* skipping instance binders removed the
+compile failures that renaming `inst` used to cause, so the perturbation now
+fires on **24/24 anchors instead of 13/24**. That nearly doubles the supply of
+substantial positive pairs, which was the scarcest thing in the dataset.
+
+The reframing matters more than either number. An α-renamed statement is
+logically identical to its anchor and lexically about as far away as a random
+theorem — it even retrieves the *wrong* anchor 10 times out of 24. That is not
+a defect to be engineered away; it is the definition of a hard positive, and it
+is the one pair type in the set that forces a model to read structure instead
+of identifiers. The old version was unusable because of the `wv` shortcut. The
+new one is the most valuable positive we have.
 
 **Our `negate` is more surface-visible than expected.** The prior was that
 negation would be hard to tell apart. Measured, it has the *largest* surface Δ
@@ -179,6 +203,13 @@ involved and the invariance is learnable from surface statistics alone.
 24/24 breadth anchors — it is the single most-produced perturbation in the set
 and the least informative. **Downweight it in any training mix**, or its
 abundance over the interesting perturbations will dominate the loss.
+
+`alpha_rename` is the exception that shows the two axes really are independent.
+It needs no mathematical knowledge whatsoever — it belongs in this tier by
+construction — and yet it is the most valuable pair in the dataset, because
+knowing that renaming is irrelevant is worthless *unless* the representation
+also survives most of its tokens changing. Low knowledge, extreme signal.
+Do not downweight this one.
 
 `premise_permute` is the sharpest illustration of the tier being worthless as
 *training* signal. Like `quantifier_swap` it preserves the token multiset
@@ -294,14 +325,16 @@ those are what a contrastive objective pairs the negatives against.
 | | Tier 0–2 (little knowledge) | Tier 3–4 (much knowledge) |
 |---|---|---|
 | **Hidden negatives** (signal ≫ 0) | `negate`, `connective_swap`, `quantifier_swap` — *learn these first* | `strictness_swap`, `const_to_zero_one`, `flip_bound`, `eq_to_le`, `arith_op_swap`, `tc_sibling_swap`, `tc_weaken_hyp` — *the eventual target* |
-| **Hidden positives** (signal ≪ 0) | `de_morgan_rewrite` — *the one usable positive we have* | *(none)* — `definitional_unfold` at −0.06 barely rewrites anything |
+| **Hidden positives** (signal ≪ 0) | `alpha_rename` (−0.76), `de_morgan_rewrite` (−0.12) — *the whole positive supply* | *(none)* — `definitional_unfold` at −0.06 barely rewrites anything |
 | **Aligned** (signal ≈ 0) | `implicit_explicit_toggle`, `premise_permute`, `uncurry` — *downweight* | `specialize_type`, `tc_strengthen_hyp` — *low priority* |
 
-The empty cell is a real problem, not a formatting artefact. Every usable
-positive pair in the dataset comes from **one** perturbation,
-`de_morgan_rewrite`, since `alpha_rename` is broken and the rest barely edit the
-string. A contrastive objective needs both sides, so this is as pressing as the
-quantifier gap.
+Positives remain the thin side of the dataset. Two perturbations supply all of
+them, they are both Tier 0–1, and they are very far apart in difficulty —
+`alpha_rename` at −0.76 and `de_morgan_rewrite` at −0.12, with nothing in
+between. A contrastive objective would be training on either "identifiers do
+not matter" or "almost nothing changed", with no middle. **A positive that
+rewrites a moderate amount of a statement for a real mathematical reason is the
+clearest remaining gap**, alongside quantifier coverage.
 
 A curriculum falls straight out of this, and it is a testable claim rather than
 a hunch:
@@ -351,7 +384,7 @@ Being explicit about the gaps, because most of them are fixable:
 ## Why the logical tactics never fire
 
 Sampling 24 Mathlib anchors chosen specifically for implication shape
-(`data/mathlib-review`) raised total yield from 49 variants to **287**, and
+(`data/mathlib-review`) raised total yield from 49 variants to **298**, and
 lifted single-run coverage from 16 of 28 perturbations to 20. Four of those had
 never fired in *any* run before — `definitional_unfold` 6/24, `quantifier_swap`
 2/24, `bound_tighter` 2/24, `forall_to_exists` 1/24 — taking coverage across all
@@ -402,7 +435,7 @@ python pipeline/analyze_geometry.py --run data/benchmark-review
 python pipeline/run_deep_chains.py --anchor bench_000 --depth 3 --max-nodes 40
 python pipeline/analyze_geometry.py --run data/deep-chains
 
-# breadth: 24 shape-sampled Mathlib anchors, 287 variants
+# breadth: 24 shape-sampled Mathlib anchors, 298 variants
 python pipeline/sample_mathlib_anchors.py --limit 24 --verify
 python pipeline/run_benchmark_review.py --anchors-file data/anchors/mathlib-24.jsonl \
     --out data/mathlib-review
